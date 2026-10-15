@@ -3,6 +3,7 @@ package elmifdali.ebankservice.feign;
 import elmifdali.ebankservice.model.Customer;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ public interface CustomerRestClient {
     }
 
     default Customer getDefaultCustomer(Long id, Throwable exception) {
+        LoggerFactory.getLogger(CustomerRestClient.class).warn("Fallback for customer {}: {}", id, exception.toString());
         return Customer.builder().id(id).name("Not available").email("Not available").available(false).build();
     }
 }

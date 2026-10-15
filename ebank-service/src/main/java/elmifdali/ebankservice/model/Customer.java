@@ -8,7 +8,11 @@ public class Customer {
     private Long id;
     private String name;
     private String email;
-    // false when the value comes from the circuit breaker fallback
-    @Builder.Default
-    private boolean available = true;
+    // false only for the circuit breaker fallback. customer-service does not send it, hence the wrapper type
+    @Getter(AccessLevel.NONE)
+    private Boolean available;
+
+    public boolean isAvailable() {
+        return available == null || available;
+    }
 }
