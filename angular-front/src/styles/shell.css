@@ -1,0 +1,161 @@
+/* The zellige wall that the glass refracts */
+.lattice, .tiles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+.lattice path { fill: none; stroke: var(--lattice); }
+.tiles { z-index: -2; overflow: hidden; }
+
+/* An eight-point khatam: two squares turned by 45 degrees */
+.tile {
+  position: absolute;
+  width: var(--size);
+  aspect-ratio: 1;
+  color: var(--hue);
+}
+.tile::before, .tile::after { content: ''; position: absolute; inset: 14%; background: currentColor; }
+.tile::after { rotate: 45deg; }
+.tile-blue { --size: 52vmax; --hue: var(--tile-blue); left: -20vmax; top: -16vmax; }
+.tile-lagoon { --size: 42vmax; --hue: var(--tile-lagoon); right: -14vmax; top: -6vmax; }
+.tile-saffron { --size: 32vmax; --hue: var(--tile-saffron); right: 20vmax; bottom: -17vmax; }
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(28px) saturate(1.5);
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 40;
+  translate: 0 -200%;
+  padding: 10px 16px;
+  border-radius: var(--r-control);
+  background: var(--saffron);
+  color: var(--saffron-ink);
+}
+.skip-link:focus { translate: 0; }
+
+.progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 30;
+  height: 3px;
+  background: var(--saffron);
+  transform-origin: left;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.progress.is-active { opacity: 1; animation: progress 1.3s var(--ease) infinite; }
+@keyframes progress {
+  from { transform: scaleX(0.05); }
+  to { transform: scaleX(1); }
+}
+
+/* A floating pillar whose head is an arch */
+.rail {
+  position: fixed;
+  z-index: 20;
+  inset: 20px auto 20px 20px;
+  width: var(--rail);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 10px 14px;
+  border-radius: 54px 54px var(--r-panel) var(--r-panel);
+}
+.brand {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  text-decoration: none;
+  font: 700 1.15rem var(--display);
+}
+.dock { display: grid; gap: 4px; width: 100%; margin-block: auto; }
+.dock a, .theme-switch {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 9px 2px;
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+.dock .ph, .theme-switch .ph { font-size: 1.55rem; }
+.dock a:hover, .theme-switch:hover { background: var(--selected); color: var(--ink); }
+.dock a.is-active { background: var(--accent); color: var(--on-accent); }
+
+.stage {
+  display: block;
+  max-width: 1720px;
+  margin-inline: auto;
+  padding: 20px var(--gutter) 20px calc(var(--rail) + 20px + var(--gutter));
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 64px;
+  margin: 12px 0 20px;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+@media (max-width: 820px) {
+  .rail {
+    position: static;
+    width: auto;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    /* backdrop-filter would trap the fixed dock inside the header */
+    backdrop-filter: none;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img { width: 38px; height: 38px; }
+  .theme-switch { width: 44px; height: 44px; place-items: center; padding: 0; }
+  .theme-switch span { display: none; }
+  .dock {
+    position: fixed;
+    inset: auto 10px calc(10px + env(safe-area-inset-bottom));
+    z-index: 20;
+    width: auto;
+    margin: 0;
+    padding: 5px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 24px;
+    background: var(--glass-strong);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(22px);
+  }
+  .dock a { padding: 6px 0; font-size: 0.64rem; }
+  .dock .ph { font-size: 1.35rem; }
+  .stage { padding: 0 16px calc(96px + env(safe-area-inset-bottom)); }
+  .page-head { margin: 4px 0 14px; }
+}
