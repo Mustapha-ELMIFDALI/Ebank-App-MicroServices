@@ -1,0 +1,10 @@
+<app-seal class="note-seal" [value]="account().id" />
+<span class="note-top">
+  <span class="note-bank">E-Bank</span>
+  <span class="note-type">{{ label() }}</span>
+</span>
+<span class="note-amount">{{ account().balance | number: '1.2-2' }}<small>MAD</small></span>
+<span class="note-foot">
+  <span class="note-owner person">{{ owner() }}</span>
+  <span class="note-serial">{{ serial() }}<small>{{ account().createdAt | date: 'MM/yy' }}</small></span>
+</span>
