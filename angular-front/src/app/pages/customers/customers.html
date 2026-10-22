@@ -1,0 +1,75 @@
+<header class="page-head">
+  <h1>Customers</h1>
+  <p class="legend">
+    <span><i class="key key-current"></i>Current</span>
+    <span><i class="key key-saving"></i>Savings</span>
+  </p>
+</header>
+
+<div class="customers-page">
+  <section class="people glass" aria-label="Customer list">
+    @switch (bank.customers().status) {
+      @case (Status.LOADING) {
+        <p class="empty">Loading customers…</p>
+      }
+      @case (Status.ERROR) {
+        <app-notice heading="Customers are unavailable. " [message]="bank.customers().errorMessage" (retry)="bank.refresh()" />
+      }
+      @case (Status.SUCCESS) {
+        <ul>
+          @for (person of people(); track person.id) {
+            <li class="person-row">
+              <span class="avatar">
+                <app-seal [value]="'customer:' + person.id + person.name" [rings]="7" />
+                <b>{{ person.name.charAt(0).toUpperCase() }}</b>
+              </span>
+              <span class="identity">
+                <span class="person">{{ person.name }}</span>
+                <small>{{ person.email }}</small>
+              </span>
+              <span class="person-holdings">
+                <span><b class="amount">{{ person.totals.total | number: '1.2-2' }} MAD</b><small>{{ person.count }} {{ person.count === 1 ? 'account' : 'accounts' }}</small></span>
+                <app-split-bar [totals]="person.totals" [max]="largest()" />
+              </span>
+              <a class="round" routerLink="/accounts" [queryParams]="{ customer: person.id }" [attr.aria-label]="'Accounts of ' + person.name">
+                <i class="ph ph-arrow-up-right"></i>
+              </a>
+            </li>
+          } @empty {
+            <li class="empty">No customer yet. Add the first one with the form.</li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <section class="enrol" aria-labelledby="enrol-title">
+    <app-seal class="enrol-seal" value="enrol" />
+    <h2 id="enrol-title">Add a customer</h2>
+    <form class="form" novalidate (submit)="save($event)">
+      <label class="field">
+        <span>Name</span>
+        <input autocomplete="off" [formField]="customerForm.name" />
+        @if (customerForm.name().touched() && customerForm.name().invalid()) {
+          <em class="field-error">{{ customerForm.name().errors()[0].message }}</em>
+        }
+      </label>
+      <label class="field">
+        <span>Email</span>
+        <input type="email" autocomplete="off" [formField]="customerForm.email" />
+        @if (customerForm.email().touched() && customerForm.email().invalid()) {
+          <em class="field-error">{{ customerForm.email().errors()[0].message }}</em>
+        }
+      </label>
+      @if (failure()) {
+        <p class="form-error" role="alert">{{ failure() }}</p>
+      }
+      @if (added()) {
+        <p class="form-success" role="status"><i class="ph ph-check-circle" aria-hidden="true"></i>{{ added() }} was added.</p>
+      }
+      <button class="button button-saffron" type="submit" [disabled]="customerForm().submitting()">
+        {{ customerForm().submitting() ? 'Adding customer…' : 'Add customer' }}
+      </button>
+    </form>
+  </section>
+</div>
