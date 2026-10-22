@@ -1,0 +1,35 @@
+<form class="form" novalidate (submit)="save($event)">
+  <label class="field">
+    <span>Customer</span>
+    <select class="select" [formField]="accountForm.customerId">
+      <option value="">Choose a customer</option>
+      @for (person of bank.customers().items; track person.id) {
+        <option [value]="'' + person.id">{{ person.name }}</option>
+      }
+    </select>
+    @if (accountForm.customerId().touched() && accountForm.customerId().invalid()) {
+      <em class="field-error">{{ accountForm.customerId().errors()[0].message }}</em>
+    }
+  </label>
+
+  <fieldset class="type-choice">
+    <legend>Type</legend>
+    <label><input type="radio" value="CURRENT_ACCOUNT" [formField]="accountForm.type" /><i class="chip"></i>Current</label>
+    <label><input type="radio" value="SAVING_ACCOUNT" [formField]="accountForm.type" /><i class="chip chip-saving"></i>Savings</label>
+  </fieldset>
+
+  <label class="field">
+    <span>Opening balance, MAD</span>
+    <input type="number" inputmode="decimal" step="0.01" [formField]="accountForm.balance" />
+    @if (accountForm.balance().touched() && accountForm.balance().invalid()) {
+      <em class="field-error">{{ accountForm.balance().errors()[0].message }}</em>
+    }
+  </label>
+
+  @if (failure()) {
+    <p class="form-error" role="alert">{{ failure() }}</p>
+  }
+  <button class="button button-primary" type="submit" [disabled]="accountForm().submitting()">
+    {{ accountForm().submitting() ? 'Opening account…' : 'Open account' }}
+  </button>
+</form>
