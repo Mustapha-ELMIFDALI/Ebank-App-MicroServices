@@ -1,0 +1,57 @@
+<div class="assistant-page">
+  <header class="page-head">
+    <h1>Assistant</h1>
+    @if (chat.messages().length) {
+      <button type="button" class="button button-quiet" (click)="chat.restart()"><i class="ph ph-note-pencil" aria-hidden="true"></i>New conversation</button>
+    }
+  </header>
+
+  <section class="conversation glass" aria-label="Conversation">
+    <div #log class="log" role="log" [attr.aria-busy]="chat.busy()" tabindex="0" (scroll)="onScroll(log)">
+      @for (message of chat.messages(); track message.id) {
+        @if (message.from === 'user') {
+          <p class="question">{{ message.text }}</p>
+        } @else {
+          <article class="answer">
+            <app-seal class="answer-seal" value="assistant" [rings]="6" [class.is-working]="message.state === 'streaming'" />
+            <div class="answer-body">
+              @if (message.text) {
+                <markdown class="prose" [data]="message.text" />
+              } @else if (message.state === 'streaming') {
+                <p class="thinking">Checking the accounts…</p>
+              }
+              @if (message.state === 'failed') {
+                <p class="form-error" role="alert">The assistant cannot be reached. Check that ebank-bot is running, then ask again.</p>
+              } @else if (message.state === 'stopped') {
+                <p class="muted">Stopped. An action that had already started may still finish.</p>
+              }
+            </div>
+          </article>
+        }
+      } @empty {
+        <div class="welcome">
+          <app-seal class="welcome-seal" value="assistant" />
+          <h2>What do you need to know?</h2>
+          <p class="muted">Ask in French or English. Answers come from the live customer and account services.</p>
+          <ul class="starters">
+            @for (starter of starters; track starter.text) {
+              <li>
+                <button type="button" (click)="chat.ask(starter.text)"><i class="ph" [class]="starter.icon" aria-hidden="true"></i>{{ starter.text }}</button>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    <form class="composer" (submit)="send($event)">
+      <textarea #box rows="1" maxlength="2000" [value]="draft()" (input)="draft.set(box.value)"
+        (keydown.enter)="onEnter($event)" placeholder="Ask about a customer or an account" aria-label="Your question"></textarea>
+      @if (chat.busy()) {
+        <button type="button" class="send" (click)="chat.stop()" aria-label="Stop the answer"><i class="ph ph-stop"></i></button>
+      } @else {
+        <button type="submit" class="send" [disabled]="!draft().trim()" aria-label="Send"><i class="ph ph-paper-plane-tilt"></i></button>
+      }
+    </form>
+  </section>
+</div>
