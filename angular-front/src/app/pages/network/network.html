@@ -1,0 +1,30 @@
+<header class="page-head">
+  <h1>Network</h1>
+  <button type="button" class="button button-quiet" (click)="check()"><i class="ph ph-arrows-clockwise" aria-hidden="true"></i>Check again</button>
+</header>
+
+<div class="network">
+  @for (service of services; track service.key) {
+    @let state = health()[service.key] ?? 'checking';
+    <section class="node glass" [class.node-root]="service.key === 'gateway'">
+      <i class="ph node-icon" [class]="service.icon" aria-hidden="true"></i>
+      <div>
+        <h2>{{ service.name }}</h2>
+        <p class="muted">{{ service.role }}</p>
+      </div>
+      <p class="node-state">
+        <span class="state" [class]="'state-' + state">
+          <i class="ph" [class]="state === 'up' ? 'ph-check-circle' : state === 'down' ? 'ph-x-circle' : 'ph-circle-dashed'" aria-hidden="true"></i>
+          {{ state === 'up' ? 'Running' : state === 'down' ? 'Unreachable' : 'Checking' }}
+        </span>
+        <small>Port {{ service.port }}</small>
+      </p>
+    </section>
+    @if (service.key === 'gateway') {
+      <svg class="branches" viewBox="0 0 900 64" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M450 0v24M450 24H150v40M450 24v40M450 24h300v40" />
+      </svg>
+    }
+  }
+</div>
+<p class="registry muted">All four register with Eureka. <a href="http://localhost:8761" target="_blank" rel="noopener">Open the registry on port 8761</a></p>
