@@ -57,7 +57,7 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer {
             log.info("Telegram bot is listening");
         } catch (Exception e) {
             // a bad token must not stop the web chatbot
-            log.error("Telegram is disabled, check TELEGRAM_BOT_TOKEN: {}", e.getMessage());
+            log.error("Telegram is disabled, check TELEGRAM_BOT_TOKEN ({})", e.getClass().getSimpleName());
         }
     }
 
@@ -84,7 +84,7 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer {
             client.execute(SendChatAction.builder().chatId(chatId).action("typing").build());
             send(chatId, agent.chat(new Prompt(query), "telegram:" + chatId));
         } catch (Exception e) {
-            log.error("Telegram message not handled: {}", e.getMessage());
+            log.error("Telegram message not handled ({})", e.getClass().getSimpleName());
         }
     }
 
