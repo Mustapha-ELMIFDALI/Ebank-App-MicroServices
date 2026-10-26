@@ -23,9 +23,9 @@ export class Assistant implements OnInit {
 
   constructor() {
     afterRenderEffect(() => {
-      this.chat.messages();
+      const hasMessages = this.chat.messages().length > 0;
       const log = this.log()?.nativeElement;
-      if (log && this.followsAnswer) log.scrollTop = log.scrollHeight;
+      if (log && hasMessages && this.followsAnswer) log.scrollTop = log.scrollHeight;
     });
   }
 

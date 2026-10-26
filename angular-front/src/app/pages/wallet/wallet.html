@@ -36,7 +36,7 @@
             <button type="button" class="round" (click)="move(-1)" aria-label="Previous account"><i class="ph ph-caret-left"></i></button>
             <p aria-live="polite">{{ front() + 1 }} of {{ richest().length }}, highest balance first</p>
             <button type="button" class="round" (click)="move(1)" aria-label="Next account"><i class="ph ph-caret-right"></i></button>
-            <a class="button button-saffron" routerLink="/accounts" [queryParams]="{ id: account.id }">Open account</a>
+            <a class="button button-saffron" routerLink="/accounts" [queryParams]="{ id: account.id }">View account</a>
           </div>
         } @else {
           <p class="vault-empty">No account yet. <a routerLink="/accounts">Open the first one.</a></p>
