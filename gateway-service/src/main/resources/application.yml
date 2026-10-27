@@ -1,5 +1,6 @@
 server:
   port: 9999
+  address: ${SERVICE_BIND:127.0.0.1}
 
 spring:
   application:
