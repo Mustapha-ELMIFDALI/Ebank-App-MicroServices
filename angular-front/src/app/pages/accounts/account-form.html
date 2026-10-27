@@ -20,7 +20,7 @@
 
   <label class="field">
     <span>Opening balance, MAD</span>
-    <input type="number" inputmode="decimal" step="0.01" [formField]="accountForm.balance" />
+    <input class="amount-input" type="text" inputmode="decimal" autocomplete="off" [formField]="accountForm.balance" />
     @if (accountForm.balance().touched() && accountForm.balance().invalid()) {
       <em class="field-error">{{ accountForm.balance().errors()[0].message }}</em>
     }

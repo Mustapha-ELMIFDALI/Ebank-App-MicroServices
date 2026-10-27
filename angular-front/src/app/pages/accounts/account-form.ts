@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
-import { FormField, form, max, min, required, submit, validate } from '@angular/forms/signals';
+import { FormField, form, required, submit, validate } from '@angular/forms/signals';
+import { parseAmount } from './amount';
 import { firstValueFrom } from 'rxjs';
 import { Account, AccountType } from '../../model/account.model';
 import { errorMessageOf } from '../../model/request-state.model';
@@ -18,22 +19,21 @@ export class AccountForm implements OnInit {
   protected readonly bank = inject(BankService);
   protected readonly failure = signal('');
 
-  private readonly model = signal<{ customerId: string; type: AccountType; balance: number }>({
+  private readonly model = signal<{ customerId: string; type: AccountType; balance: string }>({
     customerId: '',
     type: 'CURRENT_ACCOUNT',
-    balance: 1000,
+    balance: '1000',
   });
 
   protected readonly accountForm = form(this.model, (path) => {
     required(path.customerId, { message: 'Choose the customer who owns the account.' });
     required(path.balance, { message: 'Enter the opening balance.' });
-    min(path.balance, 0, { message: 'The balance cannot be negative.' });
-    max(path.balance, 999999999999, { message: 'This amount is too large.' });
-    validate(path.balance, ({ value }) =>
-      Number.isFinite(value()) && Math.abs(value() * 100 - Math.round(value() * 100)) > 1e-4
-        ? { kind: 'cents', message: 'Use two decimals at most.' }
-        : undefined,
-    );
+    validate(path.balance, ({ value }) => {
+      if (!value() || parseAmount(value()) !== null) return undefined;
+      return value().trim().startsWith('-')
+        ? { kind: 'negative', message: 'The balance cannot be negative.' }
+        : { kind: 'amount', message: 'Enter an amount like 1234.56.' };
+    });
   });
 
   ngOnInit(): void {
@@ -47,7 +47,9 @@ export class AccountForm implements OnInit {
       const { customerId, type, balance } = this.model();
       try {
         this.created.emit(
-          await firstValueFrom(this.bank.createAccount({ customerId: Number(customerId), type, balance })),
+          await firstValueFrom(
+            this.bank.createAccount({ customerId: Number(customerId), type, balance: parseAmount(balance)! }),
+          ),
         );
       } catch (error) {
         this.failure.set(errorMessageOf(error as HttpErrorResponse));
