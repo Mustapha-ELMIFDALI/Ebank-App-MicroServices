@@ -72,8 +72,10 @@ public class TelegramBot implements LongPollingSingleThreadUpdateConsumer {
         var message = update.getMessage();
         String chatId = String.valueOf(message.getChatId());
         try {
-            if (!allowedUsers.isEmpty() && !allowedUsers.contains(String.valueOf(message.getFrom().getId()))) {
-                send(chatId, "Accès non autorisé.");
+            String userId = String.valueOf(message.getFrom().getId());
+            // closed by default: the web app needs a login, the bot must not be a way around it
+            if (!allowedUsers.contains(userId)) {
+                send(chatId, "Accès non autorisé. Votre identifiant est " + userId + " : ajoutez-le à TELEGRAM_ALLOWED_USERS.");
                 return;
             }
             String query = message.getText();

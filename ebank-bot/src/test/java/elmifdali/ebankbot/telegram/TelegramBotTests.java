@@ -27,8 +27,14 @@ class TelegramBotTests {
     @Test
     void sendsTheAnswerOfTheAgent() throws Exception {
         when(agent.chat(any(), eq("telegram:42"))).thenReturn("Trois clients");
-        new TelegramBot("token", Set.of(), agent, client).consume(update());
+        new TelegramBot("token", Set.of("7"), agent, client).consume(update());
         verify(client).execute(eq(SendMessage.builder().chatId("42").text("Trois clients").build()));
+    }
+
+    @Test
+    void refusesEveryoneWhileTheAllowListIsEmpty() {
+        new TelegramBot("token", Set.of(), agent, client).consume(update());
+        verifyNoInteractions(agent);
     }
 
     @Test

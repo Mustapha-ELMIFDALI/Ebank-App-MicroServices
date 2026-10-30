@@ -11,7 +11,7 @@ import static org.mockito.Mockito.*;
 class DiscordBotTests {
     private final EBankAgent agent = mock(EBankAgent.class);
     private final MessageReceivedEvent event = mock(MessageReceivedEvent.class, RETURNS_DEEP_STUBS);
-    private final DiscordBot bot = new DiscordBot("token", Set.of(), agent);
+    private final DiscordBot bot = new DiscordBot("token", Set.of("7"), agent);
 
     private void message(boolean fromBot, boolean inServer, String text) {
         when(event.getAuthor().isBot()).thenReturn(fromBot);
@@ -28,6 +28,13 @@ class DiscordBotTests {
         message(false, true, "<@100> liste des clients");
         bot.onMessageReceived(event);
         verify(agent, timeout(3000)).chat(any(), eq("discord:42:7"));
+    }
+
+    @Test
+    void refusesEveryoneWhileTheAllowListIsEmpty() {
+        message(false, false, "liste des clients");
+        new DiscordBot("token", Set.of(), agent).onMessageReceived(event);
+        verifyNoInteractions(agent);
     }
 
     @Test

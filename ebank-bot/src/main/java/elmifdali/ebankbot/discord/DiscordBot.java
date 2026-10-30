@@ -69,7 +69,12 @@ public class DiscordBot extends ListenerAdapter {
         String selfId = event.getJDA().getSelfUser().getId();
         String content = event.getMessage().getContentRaw();
         if (event.isFromGuild() && !content.matches("(?s).*<@!?" + selfId + ">.*")) return;
-        if (!allowedUsers.isEmpty() && !allowedUsers.contains(event.getAuthor().getId())) return;
+        // closed by default: the web app needs a login, the bot must not be a way around it
+        if (!allowedUsers.contains(event.getAuthor().getId())) {
+            event.getChannel().sendMessage("Accès non autorisé. Votre identifiant est " + event.getAuthor().getId()
+                    + " : ajoutez-le à DISCORD_ALLOWED_USERS.").queue();
+            return;
+        }
 
         String query = content.replaceAll("<@!?" + selfId + ">", "").trim();
         if (query.isEmpty()) return;

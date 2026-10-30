@@ -15,13 +15,13 @@ class EBankBotControllerTests {
 
     @Test
     void separatesWebConversationsFromTheOtherChannels() {
-        controller.chat("Bonjour", "42");
-        verify(agent).chat(any(), eq("web:42"));
+        controller.chat("Bonjour", "42", "7");
+        verify(agent).chat(any(), eq("web:7:42"));
     }
 
     @Test
     void rejectsQuestionsThatAreTooLong() {
-        assertThatThrownBy(() -> controller.chat("x".repeat(2001), "42")).isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> controller.chat("x".repeat(2001), "42", "7")).isInstanceOf(ResponseStatusException.class);
         verifyNoInteractions(agent);
     }
 }

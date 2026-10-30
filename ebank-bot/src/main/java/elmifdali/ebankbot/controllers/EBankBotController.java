@@ -20,14 +20,16 @@ public class EBankBotController {
 
     @GetMapping(value = "/chat", produces = TEXT)
     public String chat(@RequestParam(defaultValue = "Bonjour") String query,
-                       @RequestParam(defaultValue = "default") String conversationId) {
-        return agent.chat(promptOf(query), "web:" + conversationId);
+                       @RequestParam(defaultValue = "default") String conversationId,
+                       @RequestHeader(name = "X-User-Id", defaultValue = "local") String userId) {
+        return agent.chat(promptOf(query), "web:" + userId + ":" + conversationId);
     }
 
     @GetMapping(value = "/chatStream", produces = TEXT)
     public Flux<String> chatStream(@RequestParam(defaultValue = "Bonjour") String query,
-                                   @RequestParam(defaultValue = "default") String conversationId) {
-        return agent.chatStream(promptOf(query), "web:" + conversationId);
+                                   @RequestParam(defaultValue = "default") String conversationId,
+                       @RequestHeader(name = "X-User-Id", defaultValue = "local") String userId) {
+        return agent.chatStream(promptOf(query), "web:" + userId + ":" + conversationId);
     }
 
     private Prompt promptOf(String query) {
