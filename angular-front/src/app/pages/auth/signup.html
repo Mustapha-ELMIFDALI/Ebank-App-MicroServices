@@ -1,0 +1,46 @@
+<app-gate [email]="model().email" [holder]="model().name">
+  <h1>Create account</h1>
+  <p class="muted">Your seal is engraved from your email as you type.</p>
+  <form class="form" novalidate (submit)="save($event)">
+    <label class="field">
+      <span>Name</span>
+      <input autocomplete="name" [formField]="signupForm.name" />
+      @if (signupForm.name().touched() && signupForm.name().invalid()) {
+        <em class="field-error">{{ signupForm.name().errors()[0].message }}</em>
+      }
+    </label>
+    <label class="field">
+      <span>Email</span>
+      <input type="email" autocomplete="username" [formField]="signupForm.email" />
+      @if (signupForm.email().touched() && signupForm.email().invalid()) {
+        <em class="field-error">{{ signupForm.email().errors()[0].message }}</em>
+      }
+    </label>
+    <div class="field">
+      <label for="signup-password">Password, 10 characters or more</label>
+      <span class="password">
+        <input id="signup-password" [type]="visible() ? 'text' : 'password'" autocomplete="new-password" [formField]="signupForm.password" />
+        <button type="button" (click)="visible.set(!visible())" [attr.aria-pressed]="visible()" aria-label="Show password">
+          <i class="ph" [class]="visible() ? 'ph-eye-slash' : 'ph-eye'" aria-hidden="true"></i>
+        </button>
+      </span>
+      @if (signupForm.password().touched() && signupForm.password().invalid()) {
+        <em class="field-error">{{ signupForm.password().errors()[0].message }}</em>
+      }
+    </div>
+    <label class="field">
+      <span>Confirm password</span>
+      <input [type]="visible() ? 'text' : 'password'" autocomplete="new-password" [formField]="signupForm.confirm" />
+      @if (signupForm.confirm().touched() && signupForm.confirm().invalid()) {
+        <em class="field-error">{{ signupForm.confirm().errors()[0].message }}</em>
+      }
+    </label>
+    @if (failure()) {
+      <p class="form-error" role="alert">{{ failure() }}</p>
+    }
+    <button class="button button-primary" type="submit" [disabled]="signupForm().submitting()">
+      {{ signupForm().submitting() ? 'Creating account…' : 'Create account' }}
+    </button>
+  </form>
+  <p class="gate-switch">Already registered? <a routerLink="/login" queryParamsHandling="preserve">Sign in</a></p>
+</app-gate>

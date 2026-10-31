@@ -1,0 +1,35 @@
+<app-gate [email]="model().email">
+  <h1>Sign in</h1>
+  <p class="muted">Manage customers, accounts and the assistant.</p>
+  @if (auth.expired()) {
+    <p class="degraded" role="status"><i class="ph ph-clock" aria-hidden="true"></i>Your session ended. Sign in again.</p>
+  }
+  <form class="form" novalidate (submit)="save($event)">
+    <label class="field">
+      <span>Email</span>
+      <input type="email" autocomplete="username" [formField]="loginForm.email" />
+      @if (loginForm.email().touched() && loginForm.email().invalid()) {
+        <em class="field-error">{{ loginForm.email().errors()[0].message }}</em>
+      }
+    </label>
+    <div class="field">
+      <label for="login-password">Password</label>
+      <span class="password">
+        <input id="login-password" [type]="visible() ? 'text' : 'password'" autocomplete="current-password" [formField]="loginForm.password" />
+        <button type="button" (click)="visible.set(!visible())" [attr.aria-pressed]="visible()" aria-label="Show password">
+          <i class="ph" [class]="visible() ? 'ph-eye-slash' : 'ph-eye'" aria-hidden="true"></i>
+        </button>
+      </span>
+      @if (loginForm.password().touched() && loginForm.password().invalid()) {
+        <em class="field-error">{{ loginForm.password().errors()[0].message }}</em>
+      }
+    </div>
+    @if (failure()) {
+      <p class="form-error" role="alert">{{ failure() }}</p>
+    }
+    <button class="button button-primary" type="submit" [disabled]="loginForm().submitting()">
+      {{ loginForm().submitting() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+  <p class="gate-switch">New to E-Bank? <a routerLink="/signup" queryParamsHandling="preserve">Create an account</a></p>
+</app-gate>
