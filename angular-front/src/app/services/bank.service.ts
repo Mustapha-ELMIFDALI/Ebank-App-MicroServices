@@ -24,6 +24,11 @@ export class BankService {
     this.load(this.customersUrl, this.customers);
   }
 
+  clear(): void {
+    this.accounts.set({ status: RequestStatus.LOADING, items: [] });
+    this.customers.set({ status: RequestStatus.LOADING, items: [] });
+  }
+
   ownerOf(customerId: number): string {
     return this.names().get(customerId) ?? `Customer ${customerId}`;
   }

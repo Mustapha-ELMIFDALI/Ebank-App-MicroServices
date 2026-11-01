@@ -13,6 +13,7 @@
 
 <div class="progress" [class.is-active]="loading.isLoading()" aria-hidden="true"></div>
 
+@if (auth.signedIn()) {
 <header class="rail glass">
   <a class="brand" routerLink="/" aria-label="E-Bank wallet">
     <img src="favicon.svg" width="46" height="46" alt="" />
@@ -33,13 +34,21 @@
     }
   </nav>
 
+  <div class="rail-end">
   <button #toggle type="button" class="theme-switch" (click)="theme.toggle(toggle)"
     [attr.aria-label]="theme.theme() === 'dark' ? 'Use light mode' : 'Use dark mode'">
     <i class="ph" [class]="theme.theme() === 'dark' ? 'ph-sun' : 'ph-moon-stars'" aria-hidden="true"></i>
     <span>{{ theme.theme() === 'dark' ? 'Light' : 'Dark' }}</span>
   </button>
+  <button type="button" class="theme-switch sign-out" (click)="auth.signOut()"
+    [title]="'Signed in as ' + auth.user()?.name" aria-label="Sign out">
+    <i class="ph ph-sign-out" aria-hidden="true"></i>
+    <span>Sign out</span>
+  </button>
+  </div>
 </header>
+}
 
-<main #main id="main" class="stage" tabindex="-1">
+<main #main id="main" class="stage" [class.stage-gate]="!auth.signedIn()" tabindex="-1">
   <router-outlet />
 </main>

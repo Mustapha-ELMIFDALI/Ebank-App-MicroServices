@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, effect, inject, untracked } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from './services/auth.service';
 import { BankService } from './services/bank.service';
+import { ChatService } from './services/chat.service';
 import { LoadingService } from './services/loading.service';
 import { ThemeService } from './services/theme.service';
 
@@ -20,8 +22,27 @@ export class App {
     { path: '/network', label: 'Network', icon: 'ph-share-network' },
   ];
 
+  protected readonly auth = inject(AuthService);
+
   constructor() {
-    inject(BankService).refresh();
+    const bank = inject(BankService);
+    const chat = inject(ChatService);
+    const router = inject(Router);
+    let wasSignedIn = false;
+    effect(() => {
+      const signedIn = this.auth.signedIn();
+      untracked(() => {
+        if (signedIn) {
+          bank.refresh();
+        } else if (wasSignedIn) {
+          // nothing of the previous user stays on screen or in memory
+          bank.clear();
+          chat.restart();
+          void router.navigate(['/login']);
+        }
+        wasSignedIn = signedIn;
+      });
+    });
   }
 
   // A plain #main link would resolve against <base href="/"> and leave the page

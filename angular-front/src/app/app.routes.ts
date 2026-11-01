@@ -1,10 +1,13 @@
 import { Routes } from '@angular/router';
+import { signedInGuard, signedOutGuard } from './guards/auth.guards';
 
 export const routes: Routes = [
-  { path: '', title: 'Wallet | E-Bank', loadComponent: () => import('./pages/wallet/wallet').then((m) => m.Wallet) },
-  { path: 'accounts', title: 'Accounts | E-Bank', loadComponent: () => import('./pages/accounts/accounts').then((m) => m.Accounts) },
-  { path: 'customers', title: 'Customers | E-Bank', loadComponent: () => import('./pages/customers/customers').then((m) => m.Customers) },
-  { path: 'assistant', title: 'Assistant | E-Bank', loadComponent: () => import('./pages/assistant/assistant').then((m) => m.Assistant) },
-  { path: 'network', title: 'Network | E-Bank', loadComponent: () => import('./pages/network/network').then((m) => m.Network) },
+  { path: 'login', title: 'Sign in | E-Bank', canActivate: [signedOutGuard], loadComponent: () => import('./pages/auth/login').then((m) => m.Login) },
+  { path: 'signup', title: 'Create account | E-Bank', canActivate: [signedOutGuard], loadComponent: () => import('./pages/auth/signup').then((m) => m.Signup) },
+  { path: '', title: 'Wallet | E-Bank', canActivate: [signedInGuard], loadComponent: () => import('./pages/wallet/wallet').then((m) => m.Wallet) },
+  { path: 'accounts', title: 'Accounts | E-Bank', canActivate: [signedInGuard], loadComponent: () => import('./pages/accounts/accounts').then((m) => m.Accounts) },
+  { path: 'customers', title: 'Customers | E-Bank', canActivate: [signedInGuard], loadComponent: () => import('./pages/customers/customers').then((m) => m.Customers) },
+  { path: 'assistant', title: 'Assistant | E-Bank', canActivate: [signedInGuard], loadComponent: () => import('./pages/assistant/assistant').then((m) => m.Assistant) },
+  { path: 'network', title: 'Network | E-Bank', canActivate: [signedInGuard], loadComponent: () => import('./pages/network/network').then((m) => m.Network) },
   { path: '**', redirectTo: '' },
 ];
