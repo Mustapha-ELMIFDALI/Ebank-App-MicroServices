@@ -1,11 +1,11 @@
 # E-Bank microservices
 
 A banking application built with Spring Boot and Spring Cloud microservices, an AI agent (Spring AI, Gemini, MCP)
-and an Angular 21 front end with a glass design, in light and dark mode.
+and an Angular 21 front end with Bootstrap 5 and photos, in light and dark mode.
 
 **Author:** Mustapha El Mifdali ([Mustapha-ELMIFDALI](https://github.com/Mustapha-ELMIFDALI))
 
-![Wallet, light mode](docs/screens/01-wallet-light.png)
+![Home, light mode](docs/screens/07-home-light.jpg)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ The bot comes after the two business services because it reads their MCP tools.
   refused (503), because a fallback is not a proof that the customer exists. The circuit closes by itself afterwards.
 - **Gateway**: routes are discovered from Eureka, `/SERVICE-NAME/path`.
 
-![Circuit breaker](docs/screens/22-circuit-breaker.png)
+![Circuit breaker](docs/screens/32-circuit-breaker.jpg)
 
 ### Test with Swagger and Postman
 
@@ -93,15 +93,15 @@ To test a server with an MCP client: in Postman choose **New > MCP**, transport 
 
 The default model is `gemini-3.5-flash-lite`. Set `GEMINI_MODEL` in `.env` to change it.
 
-![Assistant](docs/screens/09-assistant-answer-dark.png)
+![Bot](docs/screens/20-bot-answer-dark.jpg)
 
 Telegram and Discord: see [docs/TELEGRAM_DISCORD.md](docs/TELEGRAM_DISCORD.md).
 
 ## Part 3: front end
 
 - Signals, signal forms, HTTP interceptors, lazy routes, streamed Markdown answers.
-- Every account is a banknote with an eight-point seal engraved from its id.
-- Light and dark mode, responsive from 320 px, keyboard navigation, reduced motion and reduced transparency.
+- Bootstrap 5: navigation bar with search, tables with filters and sorting, and a photo for each page.
+- Light and dark mode, responsive from 320 px, keyboard navigation and accessible contrast.
 
 ## Security
 
@@ -122,21 +122,20 @@ Known limits, acceptable for a local demonstration:
 
 | | Light | Dark |
 |---|---|---|
-| Sign in | ![](docs/screens/00a-login-light.png) | ![](docs/screens/00b-login-dark.png) |
-| Sign up | ![](docs/screens/00e-signup-light.png) | ![](docs/screens/00f-signup-dark.png) |
-| Wallet | ![](docs/screens/01-wallet-light.png) | ![](docs/screens/02-wallet-dark.png) |
-| Accounts | ![](docs/screens/03-accounts-light.png) | ![](docs/screens/04-accounts-dark.png) |
-| Customers | ![](docs/screens/06-customers-light.png) | ![](docs/screens/07-customers-dark.png) |
-| Assistant | ![](docs/screens/10-assistant-answer-light.png) | ![](docs/screens/09-assistant-answer-dark.png) |
-| Network | ![](docs/screens/11-network-light.png) | ![](docs/screens/12-network-dark.png) |
-| Mobile sign in | ![](docs/screens/00d-mobile-login-light.png) | ![](docs/screens/00c-mobile-login-dark.png) |
-| Mobile wallet | ![](docs/screens/13-mobile-wallet-light.png) | ![](docs/screens/14-mobile-wallet-dark.png) |
+| Sign in | ![](docs/screens/01-login-light.jpg) | ![](docs/screens/02-login-dark.jpg) |
+| Sign up | ![](docs/screens/03-signup-light.jpg) | ![](docs/screens/04-signup-dark.jpg) |
+| Home | ![](docs/screens/08-home-light-full.jpg) | ![](docs/screens/10-home-dark-full.jpg) |
+| Accounts | ![](docs/screens/11-accounts-light.jpg) | ![](docs/screens/12-accounts-dark.jpg) |
+| Customers | ![](docs/screens/16-customers-light.jpg) | ![](docs/screens/17-customers-dark.jpg) |
+| Bot | ![](docs/screens/19-bot-answer-light.jpg) | ![](docs/screens/20-bot-answer-dark.jpg) |
+| Network | ![](docs/screens/21-network-light.jpg) | ![](docs/screens/22-network-dark.jpg) |
+| Mobile | ![](docs/screens/23-mobile-home-light.jpg) | ![](docs/screens/25-mobile-accounts-dark.jpg) |
 
 | Eureka | Swagger |
 |---|---|
-| ![](docs/screens/17-eureka.png) | ![](docs/screens/19-swagger-ebank.png) |
+| ![](docs/screens/28-eureka.jpg) | ![](docs/screens/30-swagger-ebank.jpg) |
 
-All captures are in [docs/screens](docs/screens).
+All captures are in [docs/screens](docs/screens). The photos in the application are AI-generated illustrations.
 
 ## Tests
 
