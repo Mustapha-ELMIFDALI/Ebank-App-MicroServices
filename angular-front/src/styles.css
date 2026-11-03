@@ -1,0 +1,131 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.min.css";
+
+/* Small additions to Bootstrap: photos, and contrast in both color modes */
+body { min-height: 100vh; }
+main { display: block; }
+main:focus { outline: none; }
+.person { text-transform: capitalize; overflow-wrap: anywhere; }
+.amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.btn-outline-success { --bs-btn-color: var(--bs-success-text-emphasis); }
+.btn-outline-primary { --bs-btn-color: var(--bs-primary-text-emphasis); }
+.btn-outline-secondary { --bs-btn-color: var(--bs-body-color); }
+
+.skip-link { position: fixed; top: .5rem; left: .5rem; z-index: 1100; translate: 0 -200%; }
+.skip-link:focus { translate: 0; }
+
+.request-progress { position: fixed; inset: 0 0 auto; z-index: 1090; height: 3px; }
+
+/* Photo banners: the overlay is always on the side the photo keeps free for text */
+.banner {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: 250px;
+  overflow: hidden;
+  background: #08183f;
+  color: #fff;
+}
+.banner > img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgb(6 18 52 / .92) 0%, rgb(6 18 52 / .78) 38%, rgb(6 18 52 / 0) 66%);
+}
+.banner-text { max-width: 31rem; }
+.banner-text p { color: #dce5fa; }
+
+.banner-home { min-height: max(380px, min(56vh, 560px)); }
+.banner-home > img { object-position: right 72%; }
+.banner-accounts > img { object-position: 50% 48%; }
+.banner-customers > img { object-position: right 22%; }
+.banner-bot > img { object-position: left 18%; }
+.banner-bot::after { background: linear-gradient(270deg, rgb(6 18 52 / .92) 0%, rgb(6 18 52 / .7) 38%, rgb(6 18 52 / 0) 62%); }
+.banner-bot .banner-text { margin-left: auto; }
+.banner-network > img { object-position: 50% 52%; }
+
+.photo-card { overflow: hidden; }
+.photo-card img { width: 100%; height: 100%; object-fit: cover; }
+.photo-card .photo-top { aspect-ratio: 1000 / 573; }
+.photo-saving { object-position: 50% 30%; }
+.photo-side { min-height: 240px; position: relative; }
+.photo-side img { position: absolute; inset: 0; }
+.empty-photo { width: min(260px, 100%); border-radius: var(--bs-border-radius-lg); }
+
+/* On wide screens these photos keep their proportions beside the text, instead of being zoomed to the full width */
+@media (min-width: 992px) {
+  .banner-accounts, .banner-customers, .banner-bot { min-height: 310px; }
+  .banner-accounts::after, .banner-customers::after, .banner-bot::after { display: none; }
+  .banner-accounts .banner-text, .banner-customers .banner-text, .banner-bot .banner-text { max-width: 24rem; }
+  .banner-accounts > img, .banner-customers > img {
+    left: auto;
+    mask-image: linear-gradient(90deg, transparent, #000 24%);
+  }
+  .banner-accounts > img { width: min(54%, 660px); }
+  .banner-customers > img { width: min(66%, 960px); object-position: 50% 25%; }
+  .banner-bot > img {
+    right: auto;
+    width: min(56%, 740px);
+    object-position: left 25%;
+    mask-image: linear-gradient(90deg, #000 70%, transparent);
+  }
+}
+
+/* Sign in and sign up */
+.auth-card { max-width: 1040px; }
+.auth-photo { position: relative; min-height: 600px; }
+.auth-photo img { position: absolute; inset: 0; }
+.auth-photo-login img { object-position: 70% center; }
+.auth-photo-signup img { object-position: 35% center; }
+.auth-photo p { position: relative; max-width: 13ch; line-height: 1.15; }
+.auth-photo-login p { color: #fff; }
+.auth-photo-signup p { color: #0b1f4d; max-width: 18ch; }
+
+/* Tables */
+td.person { white-space: nowrap; }
+.sort { padding: 0; border: 0; background: none; color: inherit; font: inherit; white-space: nowrap; }
+.accounts-table td { white-space: nowrap; }
+
+/* Dialogs */
+dialog.modal-native {
+  width: min(500px, calc(100vw - 24px));
+  padding: 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+dialog.modal-native::backdrop { background: rgb(0 0 0 / .5); }
+
+/* Bot */
+.log { max-height: 58vh; overflow-y: auto; }
+.question { max-width: 85%; width: fit-content; white-space: pre-wrap; overflow-wrap: anywhere; }
+.prose { display: block; overflow-x: auto; }
+.prose table { width: max-content; min-width: min(100%, 420px); margin-bottom: 1rem; }
+.prose th, .prose td { padding: .5rem .75rem; border: 1px solid var(--bs-border-color); }
+.prose th { background: var(--bs-tertiary-bg); }
+.prose code { color: inherit; }
+
+@media (max-width: 767.98px) {
+  /* the text moves to the bottom so that the photo stays visible */
+  .banner { min-height: 310px; align-items: flex-end; }
+  .banner::after, .banner-bot::after { background: linear-gradient(0deg, rgb(6 18 52 / .94) 0%, rgb(6 18 52 / .82) 48%, rgb(6 18 52 / .05) 90%); }
+  .banner-home { min-height: 420px; }
+  .auth-photo { min-height: 190px; }
+  .auth-photo-login img { object-position: 85% 22%; }
+  .auth-photo-signup img { object-position: 50% 40%; }
+  .auth-photo p { font-size: 1.5rem; }
+  /* on a phone the text would cover the face */
+  .auth-photo-signup p { display: none; }
+}

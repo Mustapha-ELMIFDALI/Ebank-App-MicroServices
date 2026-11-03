@@ -1,35 +1,35 @@
-<app-gate [email]="model().email">
-  <h1>Sign in</h1>
-  <p class="muted">Manage customers, accounts and the assistant.</p>
+<app-gate screen="login">
+  <h1 class="h2">Sign in</h1>
+  <p class="text-body-secondary">Manage customers, accounts and the bot.</p>
   @if (auth.expired()) {
-    <p class="degraded" role="status"><i class="ph ph-clock" aria-hidden="true"></i>Your session ended. Sign in again.</p>
+    <p class="alert alert-warning" role="status">Your session ended. Sign in again.</p>
   }
-  <form class="form" novalidate (submit)="save($event)">
-    <label class="field">
-      <span>Email</span>
-      <input type="email" autocomplete="username" [formField]="loginForm.email" />
+  <form novalidate (submit)="save($event)">
+    <div class="mb-3">
+      <label class="form-label" for="login-email">Email</label>
+      <input id="login-email" class="form-control" type="email" autocomplete="username" [formField]="loginForm.email" />
       @if (loginForm.email().touched() && loginForm.email().invalid()) {
-        <em class="field-error">{{ loginForm.email().errors()[0].message }}</em>
+        <div class="invalid-feedback d-block">{{ loginForm.email().errors()[0].message }}</div>
       }
-    </label>
-    <div class="field">
-      <label for="login-password">Password</label>
-      <span class="password">
-        <input id="login-password" [type]="visible() ? 'text' : 'password'" autocomplete="current-password" [formField]="loginForm.password" />
-        <button type="button" (click)="visible.set(!visible())" [attr.aria-pressed]="visible()" aria-label="Show password">
-          <i class="ph" [class]="visible() ? 'ph-eye-slash' : 'ph-eye'" aria-hidden="true"></i>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="login-password">Password</label>
+      <div class="input-group">
+        <input id="login-password" class="form-control" [type]="visible() ? 'text' : 'password'" autocomplete="current-password" [formField]="loginForm.password" />
+        <button class="btn btn-outline-secondary" type="button" (click)="visible.set(!visible())" [attr.aria-pressed]="visible()" aria-label="Show password">
+          <i class="bi" [class]="visible() ? 'bi-eye-slash' : 'bi-eye'" aria-hidden="true"></i>
         </button>
-      </span>
+      </div>
       @if (loginForm.password().touched() && loginForm.password().invalid()) {
-        <em class="field-error">{{ loginForm.password().errors()[0].message }}</em>
+        <div class="invalid-feedback d-block">{{ loginForm.password().errors()[0].message }}</div>
       }
     </div>
     @if (failure()) {
-      <p class="form-error" role="alert">{{ failure() }}</p>
+      <p class="alert alert-danger" role="alert">{{ failure() }}</p>
     }
-    <button class="button button-primary" type="submit" [disabled]="loginForm().submitting()">
+    <button class="btn btn-primary w-100" type="submit" [disabled]="loginForm().submitting()">
       {{ loginForm().submitting() ? 'Signing in…' : 'Sign in' }}
     </button>
   </form>
-  <p class="gate-switch">New to E-Bank? <a routerLink="/signup" queryParamsHandling="preserve">Create an account</a></p>
+  <p class="mt-3 mb-0">New to E-Bank? <a class="link-body-emphasis fw-semibold" routerLink="/signup" queryParamsHandling="preserve">Create an account</a></p>
 </app-gate>

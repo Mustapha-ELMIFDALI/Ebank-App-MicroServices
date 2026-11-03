@@ -1,4 +1,4 @@
-import { Component, effect, inject, untracked } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { BankService } from './services/bank.service';
@@ -12,22 +12,23 @@ import { ThemeService } from './services/theme.service';
   templateUrl: './app.html',
 })
 export class App {
+  protected readonly auth = inject(AuthService);
   protected readonly loading = inject(LoadingService);
   protected readonly theme = inject(ThemeService);
-  protected readonly pages = [
-    { path: '/', label: 'Wallet', icon: 'ph-wallet' },
-    { path: '/accounts', label: 'Accounts', icon: 'ph-cards-three' },
-    { path: '/customers', label: 'Customers', icon: 'ph-users-three' },
-    { path: '/assistant', label: 'Assistant', icon: 'ph-chat-teardrop-dots' },
-    { path: '/network', label: 'Network', icon: 'ph-share-network' },
-  ];
+  private readonly router = inject(Router);
 
-  protected readonly auth = inject(AuthService);
+  protected readonly menuOpen = signal(false);
+  protected readonly pages = [
+    { path: '/', label: 'Home' },
+    { path: '/accounts', label: 'Accounts' },
+    { path: '/customers', label: 'Customers' },
+    { path: '/bot', label: 'Bot' },
+    { path: '/network', label: 'Network' },
+  ];
 
   constructor() {
     const bank = inject(BankService);
     const chat = inject(ChatService);
-    const router = inject(Router);
     let wasSignedIn = false;
     effect(() => {
       const signedIn = this.auth.signedIn();
@@ -38,11 +39,18 @@ export class App {
           // nothing of the previous user stays on screen or in memory
           bank.clear();
           chat.restart();
-          void router.navigate(['/login']);
+          this.menuOpen.set(false);
+          void this.router.navigate(['/login']);
         }
         wasSignedIn = signedIn;
       });
     });
+  }
+
+  protected search(words: string, event: Event): void {
+    event.preventDefault();
+    this.menuOpen.set(false);
+    void this.router.navigate(['/accounts'], { queryParams: { q: words.trim() || null } });
   }
 
   // A plain #main link would resolve against <base href="/"> and leave the page

@@ -14,11 +14,11 @@ export class Network {
   private readonly gateway = inject(GATEWAY_URL);
 
   protected readonly services = [
-    { key: 'gateway', name: 'Gateway', port: 9999, path: '', icon: 'ph-signpost', role: 'Finds each service in Eureka and routes every request to it.' },
-    { key: 'auth', name: 'Auth service', port: 8059, path: '/AUTH-SERVICE', icon: 'ph-fingerprint', role: 'Signs users in and issues the tokens that the gateway checks.' },
-    { key: 'customer', name: 'Customer service', port: 8085, path: '/CUSTOMER-SERVICE', icon: 'ph-users-three', role: 'Stores customers. Offers REST and three MCP tools.' },
-    { key: 'ebank', name: 'EBank service', port: 8057, path: '/EBANK-SERVICE', icon: 'ph-vault', role: 'Stores accounts. Checks owners with OpenFeign and a circuit breaker.' },
-    { key: 'bot', name: 'EBank bot', port: 8058, path: '/EBANK-BOT', icon: 'ph-sparkle', role: 'Gemini agent with memory, calling both services through MCP.' },
+    { key: 'gateway', name: 'Gateway', port: 9999, path: '', icon: 'bi-signpost-split', role: 'Finds each service in Eureka and routes every request to it.' },
+    { key: 'auth', name: 'Auth service', port: 8059, path: '/AUTH-SERVICE', icon: 'bi-fingerprint', role: 'Signs users in and issues the tokens that the gateway checks.' },
+    { key: 'customer', name: 'Customer service', port: 8085, path: '/CUSTOMER-SERVICE', icon: 'bi-people', role: 'Stores customers. Offers REST and three MCP tools.' },
+    { key: 'ebank', name: 'EBank service', port: 8057, path: '/EBANK-SERVICE', icon: 'bi-safe', role: 'Stores accounts. Checks owners with OpenFeign and a circuit breaker.' },
+    { key: 'bot', name: 'EBank bot', port: 8058, path: '/EBANK-BOT', icon: 'bi-stars', role: 'Gemini agent with memory, calling both services through MCP.' },
   ];
   protected readonly health = signal<Partial<Record<string, Health>>>({});
 

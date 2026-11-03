@@ -1,75 +1,93 @@
-<header class="page-head">
-  <h1>Customers</h1>
-  <p class="legend">
-    <span><i class="key key-current"></i>Current</span>
-    <span><i class="key key-saving"></i>Savings</span>
-  </p>
-</header>
+<section class="banner banner-customers">
+  <img src="images/customers.jpg" alt="" />
+  <div class="container py-4">
+    <div class="banner-text">
+      <h1 class="fw-bold">Customers</h1>
+      <p class="lead mb-0">The people behind every account.</p>
+    </div>
+  </div>
+</section>
 
-<div class="customers-page">
-  <section class="people glass" aria-label="Customer list">
-    @switch (bank.customers().status) {
-      @case (Status.LOADING) {
-        <p class="empty">Loading customers…</p>
-      }
-      @case (Status.ERROR) {
-        <app-notice heading="Customers are unavailable. " [message]="bank.customers().errorMessage" (retry)="bank.refresh()" />
-      }
-      @case (Status.SUCCESS) {
-        <ul>
-          @for (person of people(); track person.id) {
-            <li class="person-row">
-              <span class="avatar">
-                <app-seal [value]="'customer:' + person.id + person.name" [rings]="7" />
-                <b>{{ person.name.charAt(0).toUpperCase() }}</b>
-              </span>
-              <span class="identity">
-                <span class="person">{{ person.name }}</span>
-                <small>{{ person.email }}</small>
-              </span>
-              <span class="person-holdings">
-                <span><b class="amount">{{ person.totals.total | number: '1.2-2' }} MAD</b><small>{{ person.count }} {{ person.count === 1 ? 'account' : 'accounts' }}</small></span>
-                <app-split-bar [totals]="person.totals" [max]="largest()" />
-              </span>
-              <a class="round" routerLink="/accounts" [queryParams]="{ customer: person.id }" [attr.aria-label]="'Accounts of ' + person.name">
-                <i class="ph ph-arrow-up-right"></i>
-              </a>
-            </li>
-          } @empty {
-            <li class="empty">No customer yet. Add the first one with the form.</li>
+<div class="container py-4">
+  <div class="row g-4">
+    <section class="col-lg-8" aria-label="Customer list">
+      @switch (bank.customers().status) {
+        @case (Status.LOADING) {
+          <p role="status">Loading customers…</p>
+        }
+        @case (Status.ERROR) {
+          <app-notice heading="Customers are unavailable. " [message]="bank.customers().errorMessage" (retry)="bank.refresh()" />
+        }
+        @case (Status.SUCCESS) {
+          @if (people().length) {
+            <div class="table-responsive" role="region" aria-label="Customers" tabindex="0">
+              <table class="table table-bordered table-striped table-hover align-middle shadow-sm people">
+                <thead class="table-dark">
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Accounts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (person of people(); track person.id) {
+                    <tr>
+                      <td>{{ person.id }}</td>
+                      <td class="person">{{ person.name }}</td>
+                      <td>{{ person.email }}</td>
+                      <td class="text-success-emphasis fw-bold amount">{{ person.totals.total | number: '1.2-2' }} MAD</td>
+                      <td>
+                        <a class="btn btn-sm btn-outline-primary text-nowrap" routerLink="/accounts" [queryParams]="{ customer: person.id }"
+                          [attr.aria-label]="'See the ' + person.count + ' accounts of ' + person.name">See {{ person.count }}</a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="text-center py-4">
+              <img class="empty-photo mb-3" src="images/empty.jpg" alt="" />
+              <p class="lead">No customer yet. Add the first one with the form.</p>
+            </div>
           }
-        </ul>
+        }
       }
-    }
-  </section>
+    </section>
 
-  <section class="enrol" aria-labelledby="enrol-title">
-    <app-seal class="enrol-seal" value="enrol" />
-    <h2 id="enrol-title">Add a customer</h2>
-    <form class="form" novalidate (submit)="save($event)">
-      <label class="field">
-        <span>Name</span>
-        <input autocomplete="off" [formField]="customerForm.name" />
-        @if (customerForm.name().touched() && customerForm.name().invalid()) {
-          <em class="field-error">{{ customerForm.name().errors()[0].message }}</em>
-        }
-      </label>
-      <label class="field">
-        <span>Email</span>
-        <input type="email" autocomplete="off" [formField]="customerForm.email" />
-        @if (customerForm.email().touched() && customerForm.email().invalid()) {
-          <em class="field-error">{{ customerForm.email().errors()[0].message }}</em>
-        }
-      </label>
-      @if (failure()) {
-        <p class="form-error" role="alert">{{ failure() }}</p>
-      }
-      @if (added()) {
-        <p class="form-success" role="status"><i class="ph ph-check-circle" aria-hidden="true"></i>{{ added() }} was added.</p>
-      }
-      <button class="button button-saffron" type="submit" [disabled]="customerForm().submitting()">
-        {{ customerForm().submitting() ? 'Adding customer…' : 'Add customer' }}
-      </button>
-    </form>
-  </section>
+    <section class="col-lg-4" aria-labelledby="enrol-title">
+      <div class="card shadow-sm enrol">
+        <div class="card-body p-4">
+          <h2 id="enrol-title" class="h4 mb-3">Add a customer</h2>
+          <form novalidate (submit)="save($event)">
+            <div class="mb-3">
+              <label class="form-label" for="customer-name">Name</label>
+              <input id="customer-name" class="form-control" autocomplete="off" [formField]="customerForm.name" />
+              @if (customerForm.name().touched() && customerForm.name().invalid()) {
+                <div class="invalid-feedback d-block">{{ customerForm.name().errors()[0].message }}</div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="customer-email">Email</label>
+              <input id="customer-email" class="form-control" type="email" autocomplete="off" [formField]="customerForm.email" />
+              @if (customerForm.email().touched() && customerForm.email().invalid()) {
+                <div class="invalid-feedback d-block">{{ customerForm.email().errors()[0].message }}</div>
+              }
+            </div>
+            @if (failure()) {
+              <p class="alert alert-danger" role="alert">{{ failure() }}</p>
+            }
+            @if (added()) {
+              <p class="alert alert-success form-success" role="status">{{ added() }} was added.</p>
+            }
+            <button class="btn btn-primary w-100" type="submit" [disabled]="customerForm().submitting()">
+              {{ customerForm().submitting() ? 'Adding customer…' : 'Add customer' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>

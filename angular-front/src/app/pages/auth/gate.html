@@ -1,21 +1,15 @@
-<div class="gate">
-  <section class="gate-vault" aria-label="About E-Bank">
-    <app-seal class="gate-seal" [value]="seed()" [rings]="16" />
-    <p class="gate-brand"><img src="favicon.svg" width="46" height="46" alt="" />E-Bank</p>
-    <p class="gate-line">Every account carries its own seal. So will you.</p>
-    <div class="pass note note-saving" aria-hidden="true">
-      <app-seal class="note-seal" [value]="seed()" />
-      <span class="note-top"><span class="note-bank">E-Bank</span><span class="note-type">Banker</span></span>
-      <span class="pass-name">{{ title() }}</span>
-      <span class="pass-email">{{ email() || 'name@example.com' }}</span>
+<div class="container py-4 py-lg-5">
+  <div class="card photo-card auth-card shadow mx-auto">
+    <div class="row g-0">
+      <div class="col-md-6 auth-photo" [class]="'auth-photo-' + screen()">
+        <img [src]="'images/' + screen() + '.jpg'" alt="" />
+        <p class="display-6 fw-bold p-4 p-lg-5 mb-0">
+          {{ screen() === 'login' ? 'The door is open for you' : 'Banking that fits in your hand' }}
+        </p>
+      </div>
+      <div class="col-md-6 d-flex align-items-center">
+        <div class="w-100 p-4 p-lg-5"><ng-content /></div>
+      </div>
     </div>
-  </section>
-
-  <section class="gate-form glass">
-    <button #toggle type="button" class="round gate-theme" (click)="theme.toggle(toggle)"
-      [attr.aria-label]="theme.theme() === 'dark' ? 'Use light mode' : 'Use dark mode'">
-      <i class="ph" [class]="theme.theme() === 'dark' ? 'ph-sun' : 'ph-moon-stars'" aria-hidden="true"></i>
-    </button>
-    <div class="gate-body"><ng-content /></div>
-  </section>
+  </div>
 </div>

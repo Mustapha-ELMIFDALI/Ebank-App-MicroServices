@@ -1,17 +1,10 @@
-import { Component, computed, inject, input } from '@angular/core';
-import { ThemeService } from '../../services/theme.service';
-import { Seal } from '../../shared/seal/seal';
+import { Component, input } from '@angular/core';
 
-// The frame of both screens. The pass engraves its seal while the email is typed
+// The frame of both screens: a photo and a form
 @Component({
   selector: 'app-gate',
-  imports: [Seal],
   templateUrl: './gate.html',
 })
 export class Gate {
-  readonly email = input('');
-  readonly holder = input('');
-  protected readonly theme = inject(ThemeService);
-  protected readonly seed = computed(() => this.email().trim().toLowerCase() || 'e-bank');
-  protected readonly title = computed(() => this.holder().trim() || this.email().split('@')[0] || 'Your name');
+  readonly screen = input.required<'login' | 'signup'>();
 }

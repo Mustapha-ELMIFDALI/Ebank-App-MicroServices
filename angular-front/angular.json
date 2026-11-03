@@ -26,14 +26,7 @@
               }
             ],
             "styles": [
-              "node_modules/@fontsource-variable/readex-pro/index.css",
-              "node_modules/@fontsource-variable/el-messiri/index.css",
-              "node_modules/@phosphor-icons/web/src/regular/style.css",
-              "src/styles/tokens.css",
-              "src/styles/shell.css",
-              "src/styles/components.css",
-              "src/styles/pages.css",
-              "src/styles/auth.css"
+              "src/styles.css"
             ]
           },
           "configurations": {

@@ -3,10 +3,10 @@ import { Component, input, output } from '@angular/core';
 @Component({
   selector: 'app-notice',
   template: `
-    <div class="notice" role="alert">
-      <i class="ph ph-plugs" aria-hidden="true"></i>
-      <p><strong>{{ heading() }}</strong>{{ message() }}</p>
-      <button type="button" class="button button-quiet" (click)="retry.emit()">Retry</button>
+    <div class="alert alert-danger d-flex flex-wrap align-items-center gap-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <div class="flex-grow-1"><strong>{{ heading() }}</strong>{{ message() }}</div>
+      <button type="button" class="btn btn-danger btn-sm" (click)="retry.emit()">Retry</button>
     </div>
   `,
 })

@@ -1,54 +1,49 @@
-<a class="skip-link" href="#main" (click)="skipToContent(main, $event)">Skip to content</a>
-
-<svg class="lattice" aria-hidden="true">
-  <defs>
-    <pattern id="zellige" width="112" height="112" patternUnits="userSpaceOnUse">
-      <path d="M28 28h56v56H28z M56 16.4 95.6 56 56 95.6 16.4 56z" />
-      <path d="M0 0 28 28 M112 0 84 28 M0 112 28 84 M112 112 84 84 M56 0v16.4 M56 95.6V112 M0 56h16.4 M95.6 56H112" />
-    </pattern>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#zellige)" />
-</svg>
-<div class="tiles" aria-hidden="true"><i class="tile tile-blue"></i><i class="tile tile-lagoon"></i><i class="tile tile-saffron"></i></div>
-
-<div class="progress" [class.is-active]="loading.isLoading()" aria-hidden="true"></div>
-
-@if (auth.signedIn()) {
-<header class="rail glass">
-  <a class="brand" routerLink="/" aria-label="E-Bank wallet">
-    <img src="favicon.svg" width="46" height="46" alt="" />
-    <span>E-Bank</span>
-  </a>
-
-  <nav class="dock" aria-label="Main">
-    @for (page of pages; track page.path) {
-      <a
-        [routerLink]="page.path"
-        routerLinkActive="is-active"
-        ariaCurrentWhenActive="page"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <i class="ph" [class]="page.icon" aria-hidden="true"></i>
-        <span>{{ page.label }}</span>
-      </a>
-    }
-  </nav>
-
-  <div class="rail-end">
-  <button #toggle type="button" class="theme-switch" (click)="theme.toggle(toggle)"
-    [attr.aria-label]="theme.theme() === 'dark' ? 'Use light mode' : 'Use dark mode'">
-    <i class="ph" [class]="theme.theme() === 'dark' ? 'ph-sun' : 'ph-moon-stars'" aria-hidden="true"></i>
-    <span>{{ theme.theme() === 'dark' ? 'Light' : 'Dark' }}</span>
-  </button>
-  <button type="button" class="theme-switch sign-out" (click)="auth.signOut()"
-    [title]="'Signed in as ' + auth.user()?.name" aria-label="Sign out">
-    <i class="ph ph-sign-out" aria-hidden="true"></i>
-    <span>Sign out</span>
-  </button>
-  </div>
-</header>
+<a class="skip-link btn btn-primary" href="#main" (click)="skipToContent(main, $event)">Skip to content</a>
+@if (loading.isLoading()) {
+  <div class="request-progress bg-primary" aria-hidden="true"></div>
 }
 
-<main #main id="main" class="stage" [class.stage-gate]="!auth.signedIn()" tabindex="-1">
+<header>
+  <nav class="navbar navbar-expand-xl bg-body-tertiary border-bottom" aria-label="Main">
+    <div class="container-fluid">
+      <a class="navbar-brand" routerLink="/" (click)="menuOpen.set(false)">E-Bank · ElMifdali</a>
+      <div class="d-flex gap-2 order-xl-last ms-xl-2">
+        <button type="button" class="btn btn-outline-secondary theme-switch" (click)="theme.toggle()"
+          [attr.aria-label]="theme.theme() === 'dark' ? 'Use light mode' : 'Use dark mode'">
+          <i class="bi" [class]="theme.theme() === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'" aria-hidden="true"></i>
+        </button>
+        @if (auth.signedIn()) {
+          <button type="button" class="btn btn-outline-secondary sign-out" (click)="auth.signOut()"
+            [title]="'Signed in as ' + auth.user()?.name" aria-label="Sign out">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            <span class="d-none d-xxl-inline ms-1">Sign out</span>
+          </button>
+          <button class="navbar-toggler" type="button" (click)="menuOpen.set(!menuOpen())"
+            aria-controls="main-menu" [attr.aria-expanded]="menuOpen()" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        }
+      </div>
+      @if (auth.signedIn()) {
+        <div class="collapse navbar-collapse" id="main-menu" [class.show]="menuOpen()">
+          <ul class="navbar-nav me-auto mb-2 mb-xl-0">
+            @for (page of pages; track page.path) {
+              <li class="nav-item">
+                <a class="nav-link" [routerLink]="page.path" routerLinkActive="active fw-semibold" ariaCurrentWhenActive="page"
+                  [routerLinkActiveOptions]="{ exact: page.path === '/' }" (click)="menuOpen.set(false)">{{ page.label }}</a>
+              </li>
+            }
+          </ul>
+          <form class="d-flex" role="search" (submit)="search(searchInput.value, $event)">
+            <input #searchInput class="form-control me-2" type="search" placeholder="Search accounts" aria-label="Search accounts" />
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form>
+        </div>
+      }
+    </div>
+  </nav>
+</header>
+
+<main #main id="main" tabindex="-1">
   <router-outlet />
 </main>

@@ -2,21 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>E-Bank</title>
+  <title>E-Bank ElMifdali</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Customers, bank accounts and the assistant of E-Bank">
-  <meta name="color-scheme" content="light dark">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script>
-    // Apply the theme before the first paint
+    // Apply the color mode before the first paint
     (function () {
       var theme;
       try { theme = localStorage.getItem('ebank-theme'); } catch (e) {}
       if (theme !== 'light' && theme !== 'dark') {
         theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
-      document.documentElement.dataset.theme = theme;
+      document.documentElement.setAttribute('data-bs-theme', theme);
     })();
   </script>
 </head>

@@ -8,12 +8,10 @@ import { totalsOf } from '../../model/account.model';
 import { RequestStatus, errorMessageOf } from '../../model/request-state.model';
 import { BankService } from '../../services/bank.service';
 import { Notice } from '../../shared/notice/notice';
-import { Seal } from '../../shared/seal/seal';
-import { SplitBar } from '../../shared/split-bar/split-bar';
 
 @Component({
   selector: 'app-customers',
-  imports: [DecimalPipe, RouterLink, FormField, Notice, Seal, SplitBar],
+  imports: [DecimalPipe, RouterLink, FormField, Notice],
   templateUrl: './customers.html',
 })
 export class Customers {
@@ -26,7 +24,6 @@ export class Customers {
       return { ...customer, count: accounts.length, totals: totalsOf(accounts) };
     }),
   );
-  protected readonly largest = computed(() => Math.max(0, ...this.people().map((person) => person.totals.total)));
 
   private readonly model = signal({ name: '', email: '' });
   protected readonly customerForm = form(this.model, (path) => {

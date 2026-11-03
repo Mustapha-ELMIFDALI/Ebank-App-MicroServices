@@ -1,98 +1,129 @@
-<header class="page-head">
-  <h1>Accounts</h1>
-  <button type="button" class="button button-primary" (click)="open()"><i class="ph ph-plus" aria-hidden="true"></i>New account</button>
-</header>
+<section class="banner banner-accounts">
+  <img src="images/current-account.jpg" alt="" />
+  <div class="container py-4">
+    <div class="banner-text">
+      <h1 class="fw-bold">Bank Accounts</h1>
+      <p class="lead mb-0">Every balance and its owner.</p>
+    </div>
+  </div>
+</section>
 
-<div class="accounts-page">
-  <section class="ledger glass" aria-label="Account list">
-    <div class="filters">
-      <label class="search">
-        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-        <input #searchField type="search" [value]="search()" (input)="search.set(searchField.value)"
-          placeholder="Search owner or account ID" aria-label="Search accounts" />
-      </label>
-      <select #ownerField class="select" aria-label="Filter by customer" (change)="owner.set(ownerField.value)">
-        <option value="" [selected]="!owner()">Every customer</option>
+<div class="container py-4">
+  <div class="row g-2 align-items-center mb-3 filters">
+    <div class="col-12 col-md">
+      <input #wordsInput class="form-control" type="search" [value]="words()" (input)="words.set(wordsInput.value)"
+        placeholder="Search owner or account ID" aria-label="Filter accounts" />
+    </div>
+    <div class="col-6 col-md-auto">
+      <select #kindInput class="form-select filter-type" aria-label="Filter by type" (change)="kind.set($any(kindInput.value))">
+        <option value="" [selected]="!kind()">All types</option>
+        <option value="CURRENT_ACCOUNT" [selected]="kind() === 'CURRENT_ACCOUNT'">Current</option>
+        <option value="SAVING_ACCOUNT" [selected]="kind() === 'SAVING_ACCOUNT'">Savings</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-auto">
+      <select #ownerInput class="form-select filter-owner" aria-label="Filter by customer" (change)="owner.set(ownerInput.value)">
+        <option value="" [selected]="!owner()">All customers</option>
         @for (person of bank.customers().items; track person.id) {
           <option [value]="person.id" [selected]="owner() === '' + person.id">{{ person.name }}</option>
         }
       </select>
-      <div class="segments" role="group" aria-label="Filter by type">
-        @for (filter of filters; track filter.value) {
-          <button type="button" [attr.aria-pressed]="type() === filter.value" (click)="type.set(filter.value)">{{ filter.label }}</button>
-        }
-      </div>
     </div>
+    <div class="col-12 col-md-auto">
+      <button type="button" class="btn btn-primary w-100 new-account" (click)="open()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New account</button>
+    </div>
+  </div>
 
-    @if (bank.accounts().status === Status.ERROR) {
-      <app-notice heading="Accounts are unavailable. " [message]="bank.accounts().errorMessage" (retry)="bank.refresh()" />
-    } @else {
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col" [attr.aria-sort]="direction('owner')"><button type="button" (click)="sortBy('owner')">Account <i class="ph ph-arrows-down-up" aria-hidden="true"></i></button></th>
-              <th scope="col" class="col-date" [attr.aria-sort]="direction('createdAt')"><button type="button" (click)="sortBy('createdAt')">Opened <i class="ph ph-arrows-down-up" aria-hidden="true"></i></button></th>
-              <th scope="col" class="col-type">Type</th>
-              <th scope="col" class="right" [attr.aria-sort]="direction('balance')"><button type="button" (click)="sortBy('balance')">Balance, MAD <i class="ph ph-arrows-down-up" aria-hidden="true"></i></button></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (account of rows(); track account.id) {
-              <tr [class.is-selected]="account.id === selectedId()" (click)="picked.set(account.id)">
-                <td>
-                  <button type="button" class="row-button" [attr.aria-pressed]="account.id === selectedId()" (click)="picked.set(account.id)">
-                    <i class="chip" [class.chip-saving]="account.type === 'SAVING_ACCOUNT'" aria-hidden="true"></i>
-                    <span><span class="person">{{ bank.ownerOf(account.customerId) }}</span><small>{{ account.id.slice(0, 8).toUpperCase() }}</small></span>
-                  </button>
-                </td>
-                <td class="col-date">{{ account.createdAt | date: 'd MMM y' }}</td>
-                <td class="col-type">{{ label(account.type) }}</td>
-                <td class="right amount">{{ account.balance | number: '1.2-2' }}</td>
-              </tr>
-            } @empty {
+  @if (createdId()) {
+    <p class="alert alert-success py-2" role="status">Account opened. It is highlighted in the table.</p>
+  }
+
+  @switch (bank.accounts().status) {
+    @case (Status.LOADING) {
+      <p class="d-flex align-items-center gap-2" role="status"><span class="spinner-border text-primary" aria-hidden="true"></span>Loading accounts…</p>
+    }
+    @case (Status.ERROR) {
+      <app-notice heading="Error loading accounts: " [message]="bank.accounts().errorMessage" (retry)="bank.refresh()" />
+    }
+    @case (Status.SUCCESS) {
+      @if (rows().length) {
+        <div class="table-responsive" role="region" aria-label="Bank accounts" tabindex="0">
+          <table class="table table-bordered table-striped table-hover align-middle shadow-sm accounts-table">
+            <thead class="table-dark">
               <tr>
-                <td colspan="4" class="empty">
-                  {{ bank.accounts().status === Status.LOADING ? 'Loading accounts…' : 'No account matches. Clear a filter or open a new account.' }}
-                </td>
+                <th scope="col">ID</th>
+                <th scope="col" [attr.aria-sort]="direction('createdAt')"><button class="sort" type="button" (click)="sortBy('createdAt')">Created At <i class="bi bi-arrow-down-up" aria-hidden="true"></i></button></th>
+                <th scope="col" [attr.aria-sort]="direction('balance')"><button class="sort sort-balance" type="button" (click)="sortBy('balance')">Balance <i class="bi bi-arrow-down-up" aria-hidden="true"></i></button></th>
+                <th scope="col">Type</th>
+                <th scope="col" [attr.aria-sort]="direction('customerId')"><button class="sort" type="button" (click)="sortBy('customerId')">Customer ID <i class="bi bi-arrow-down-up" aria-hidden="true"></i></button></th>
+                <th scope="col">Details</th>
               </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              @for (account of rows(); track account.id) {
+                <tr [class.table-active]="account.id === createdId()">
+                  <td class="cell-id">{{ account.id }}</td>
+                  <td>{{ account.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                  <td class="text-success-emphasis fw-bold amount cell-balance">{{ account.balance | number: '1.2-2' }} MAD</td>
+                  <td>
+                    <span class="badge cell-type" [class.bg-success]="account.type === 'SAVING_ACCOUNT'" [class.bg-primary]="account.type === 'CURRENT_ACCOUNT'">{{ label(account.type) }}</span>
+                  </td>
+                  <td>{{ account.customerId }} <span class="person cell-owner ms-1">{{ bank.ownerOf(account.customerId) }}</span></td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-primary show-detail" (click)="show(account.id)"
+                      [attr.aria-label]="'View account ' + account.id">View</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="text-center py-4 empty-state">
+          <img class="empty-photo mb-3" src="images/empty.jpg" alt="" />
+          <p class="lead mb-1">No account matches.</p>
+          <p class="text-body-secondary">Clear a filter or open a new account.</p>
+        </div>
+      }
     }
-  </section>
-
-  <aside class="inspector" aria-label="Selected account" aria-live="polite">
-    @if (detail()?.account; as account) {
-      <app-note [account]="account" [owner]="bank.ownerOf(account.customerId)" />
-      <div class="facts glass">
-        @if (account.customer?.available === false) {
-          <p class="degraded" role="status"><i class="ph ph-shield-warning" aria-hidden="true"></i>Customer details are unavailable for now. The balance is still accurate.</p>
-        }
-        <dl>
-          <div><dt>Owner</dt><dd class="person">{{ account.customer?.name ?? 'Unknown customer' }}</dd></div>
-          <div><dt>Email</dt><dd>{{ account.customer?.email ?? 'Not recorded' }}</dd></div>
-          <div><dt>Opened</dt><dd>{{ account.createdAt | date: 'd MMMM y, HH:mm' }}</dd></div>
-          <div><dt>Type</dt><dd>{{ label(account.type) }} account</dd></div>
-          <div class="fact-id"><dt>Account ID</dt><dd>{{ account.id }}</dd></div>
-        </dl>
-        <button type="button" class="button button-quiet" (click)="copy(account.id)">
-          <i class="ph" [class]="copied() ? 'ph-check' : 'ph-copy'" aria-hidden="true"></i>{{ copied() ? 'Copied' : 'Copy ID' }}
-        </button>
-      </div>
-    } @else {
-      <p class="facts glass muted">{{ detail()?.error || 'Select an account to see its owner.' }}</p>
-    }
-  </aside>
+  }
 </div>
 
-<dialog #dialog class="sheet glass" aria-labelledby="new-account-title" (close)="creating.set(false)">
-  <div class="section-head">
-    <h2 id="new-account-title">New account</h2>
-    <button type="button" class="round" (click)="dialog.close()" aria-label="Close"><i class="ph ph-x"></i></button>
+<dialog #createDialog class="modal-native create-dialog" aria-labelledby="create-title" (close)="creating.set(false)">
+  <div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 id="create-title" class="h4 mb-0">New account</h2>
+      <button type="button" class="btn-close" (click)="createDialog.close()" aria-label="Close"></button>
+    </div>
+    @if (creating()) {
+      <app-account-form [initialOwner]="owner()" (created)="created($event)" />
+    }
   </div>
-  @if (creating()) {
-    <app-account-form [initialOwner]="owner()" (created)="created($event)" />
-  }
+</dialog>
+
+<dialog #detailDialog class="modal-native detail-dialog" aria-labelledby="detail-title">
+  <div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 id="detail-title" class="h4 mb-0">Account details</h2>
+      <button type="button" class="btn-close" (click)="detailDialog.close()" aria-label="Close"></button>
+    </div>
+    @if (detail().account; as account) {
+      @if (account.customer?.available === false) {
+        <p class="alert alert-warning degraded" role="status">Customer details are unavailable for now. The balance is still accurate.</p>
+      }
+      <dl class="row mb-3">
+        <dt class="col-4">Owner</dt><dd class="col-8 person">{{ account.customer?.name ?? 'Unknown customer' }}</dd>
+        <dt class="col-4">Email</dt><dd class="col-8 text-break">{{ account.customer?.email ?? 'Not recorded' }}</dd>
+        <dt class="col-4">Balance</dt><dd class="col-8 amount">{{ account.balance | number: '1.2-2' }} MAD</dd>
+        <dt class="col-4">Type</dt><dd class="col-8">{{ label(account.type) }}</dd>
+        <dt class="col-4">Opened</dt><dd class="col-8">{{ account.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+        <dt class="col-4">ID</dt><dd class="col-8 small text-break">{{ account.id }}</dd>
+      </dl>
+      <button type="button" class="btn btn-outline-secondary" (click)="copy(account.id)">{{ copied() ? 'Copied' : 'Copy ID' }}</button>
+    } @else if (detail().error) {
+      <p class="alert alert-danger">{{ detail().error }}</p>
+    } @else {
+      <p role="status">Loading…</p>
+    }
+  </div>
 </dialog>

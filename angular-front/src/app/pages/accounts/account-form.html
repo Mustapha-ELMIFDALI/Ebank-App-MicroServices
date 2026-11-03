@@ -1,35 +1,38 @@
-<form class="form" novalidate (submit)="save($event)">
-  <label class="field">
-    <span>Customer</span>
-    <select class="select" [formField]="accountForm.customerId">
+<form novalidate (submit)="save($event)">
+  <div class="mb-3">
+    <label class="form-label" for="account-owner">Customer</label>
+    <select id="account-owner" class="form-select" [formField]="accountForm.customerId">
       <option value="">Choose a customer</option>
       @for (person of bank.customers().items; track person.id) {
         <option [value]="'' + person.id">{{ person.name }}</option>
       }
     </select>
     @if (accountForm.customerId().touched() && accountForm.customerId().invalid()) {
-      <em class="field-error">{{ accountForm.customerId().errors()[0].message }}</em>
+      <div class="invalid-feedback d-block">{{ accountForm.customerId().errors()[0].message }}</div>
     }
-  </label>
-
-  <fieldset class="type-choice">
-    <legend>Type</legend>
-    <label><input type="radio" value="CURRENT_ACCOUNT" [formField]="accountForm.type" /><i class="chip"></i>Current</label>
-    <label><input type="radio" value="SAVING_ACCOUNT" [formField]="accountForm.type" /><i class="chip chip-saving"></i>Savings</label>
+  </div>
+  <fieldset class="mb-3">
+    <legend class="form-label fs-6">Type</legend>
+    <div class="form-check form-check-inline">
+      <input id="type-current" class="form-check-input" type="radio" value="CURRENT_ACCOUNT" [formField]="accountForm.type" />
+      <label class="form-check-label" for="type-current">Current</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input id="type-saving" class="form-check-input" type="radio" value="SAVING_ACCOUNT" [formField]="accountForm.type" />
+      <label class="form-check-label" for="type-saving">Savings</label>
+    </div>
   </fieldset>
-
-  <label class="field">
-    <span>Opening balance, MAD</span>
-    <input class="amount-input" type="text" inputmode="decimal" autocomplete="off" [formField]="accountForm.balance" />
+  <div class="mb-3">
+    <label class="form-label" for="account-balance">Opening balance, MAD</label>
+    <input id="account-balance" class="form-control amount-input" type="text" inputmode="decimal" autocomplete="off" [formField]="accountForm.balance" />
     @if (accountForm.balance().touched() && accountForm.balance().invalid()) {
-      <em class="field-error">{{ accountForm.balance().errors()[0].message }}</em>
+      <div class="invalid-feedback d-block">{{ accountForm.balance().errors()[0].message }}</div>
     }
-  </label>
-
+  </div>
   @if (failure()) {
-    <p class="form-error" role="alert">{{ failure() }}</p>
+    <p class="alert alert-danger" role="alert">{{ failure() }}</p>
   }
-  <button class="button button-primary" type="submit" [disabled]="accountForm().submitting()">
+  <button class="btn btn-primary w-100" type="submit" [disabled]="accountForm().submitting()">
     {{ accountForm().submitting() ? 'Opening account…' : 'Open account' }}
   </button>
 </form>
