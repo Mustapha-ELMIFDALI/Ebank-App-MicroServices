@@ -1,69 +1,40 @@
-# E-Bank: microservices, AI agent and MCP
+# E-Bank : microservices, agent IA et MCP
 
-A banking application built with **Spring Boot / Spring Cloud** microservices, an **AI agent** (Spring AI, Google Gemini)
-connected to the services with **MCP**, an **Angular 21** web application and a **Telegram** bot.
+Application bancaire basée sur des microservices **Spring Boot / Spring Cloud**, un **agent IA** (Spring AI, Google Gemini)
+connecté aux services avec **MCP**, une application web **Angular 21** et un bot **Telegram**.
 
-**Author:** Mustapha El Mifdali ([Mustapha-ELMIFDALI](https://github.com/Mustapha-ELMIFDALI))
+**Auteur :** Mustapha El Mifdali ([Mustapha-ELMIFDALI](https://github.com/Mustapha-ELMIFDALI))
 
-![Home page](docs/screens/07-home-light.jpg)
+![Page d'accueil](docs/screens/07-home-light.jpg)
 
-## Contents
+## Sommaire
 
-1. [Assignment checklist](#1-assignment-checklist)
-2. [Architecture](#2-architecture)
-3. [Project structure](#3-project-structure)
-4. [Installation and start](#4-installation-and-start)
-5. [Part 1: microservices](#5-part-1-microservices)
-6. [Part 2: AI agent, MCP and bots](#6-part-2-ai-agent-mcp-and-bots)
-7. [Part 3: Angular front end](#7-part-3-angular-front-end)
-8. [Security](#8-security)
-9. [Tests and results](#9-tests-and-results)
-10. [Troubleshooting](#10-troubleshooting)
-11. [Known limits](#11-known-limits)
+1. [Architecture](#1-architecture)
+2. [Structure du projet](#2-structure-du-projet)
+3. [Installation et démarrage](#3-installation-et-démarrage)
+4. [Microservices (partie 1)](#4-microservices-partie-1)
+5. [Agent IA, MCP et bots (partie 2)](#5-agent-ia-mcp-et-bots-partie-2)
+6. [Frontend Angular (partie 3)](#6-frontend-angular-partie-3)
+7. [Sécurité](#7-sécurité)
+8. [Tests et résultats](#8-tests-et-résultats)
+9. [Dépannage](#9-dépannage)
+10. [Limites connues](#10-limites-connues)
 
----
+## Fonctionnalités ajoutées au projet
 
-## 1. Assignment checklist
-
-### Part 1 ([video](https://www.youtube.com/watch?v=cdFz3VemT1Q))
-
-| Requirement | Status | Evidence |
-|---|---|---|
-| Develop customer-service | Done | [5.1](#51-customer-service) |
-| Develop ebank-service | Done | [5.2](#52-ebank-service) |
-| Communication with OpenFeign | Done and tested | [5.3](#53-openfeign) |
-| Fault tolerance with Resilience4j | Done and tested | [5.4](#54-circuit-breaker-with-resilience4j) |
-| Develop the gateway | Done and tested | [5.5](#55-gateway) |
-| Develop the discovery service | Done and tested | [5.6](#56-discovery-service) |
-| Test with Postman and Swagger UI | Done | [5.7](#57-tests-with-swagger-ui-and-postman) |
-
-### Part 2 ([video](https://www.youtube.com/watch?v=JHvxSZTWSsY))
-
-| Requirement | Status | Evidence |
-|---|---|---|
-| AI agent based on Spring AI | Done and tested | [6.1](#61-the-agent) |
-| Expose the microservices through MCP | Done and tested | [6.2](#62-mcp-servers) |
-| Test the microservices with an MCP client | Done | [6.3](#63-test-with-an-mcp-client) |
-| Connect the chatbot to the microservices with MCP | Done and tested | [6.1](#61-the-agent) |
-| Test the chatbot with a REST client | Done | [6.4](#64-test-the-chatbot-with-a-rest-client) |
-| Test the chatbot with a Telegram client | Done, tested in Telegram | [6.5](#65-test-the-chatbot-with-telegram) |
-| Test the chatbot with a Discord client | Code and unit tests done, **live test pending** | [6.6](#66-discord) |
-
-### Added to the project
-
-| Feature | Evidence |
+| Fonctionnalité | Détails |
 |---|---|
-| Angular web application with streaming chat, light and dark mode | [7](#7-part-3-angular-front-end) |
-| Sign up and sign in with BCrypt and JWT | [8](#8-security) |
-| Repeatable API and security tests | [9](#9-tests-and-results) |
+| Application web Angular avec chat en streaming, mode clair et mode sombre | [Partie 6](#6-frontend-angular-partie-3) |
+| Inscription et connexion avec BCrypt et JWT | [Partie 7](#7-sécurité) |
+| Tests reproductibles de l'API et de la sécurité | [Partie 8](#8-tests-et-résultats) |
 
 ---
 
-## 2. Architecture
+## 1. Architecture
 
 ```mermaid
 flowchart LR
-    U([Browser]) --> WEB[angular-front :4200]
+    U([Navigateur]) --> WEB[angular-front :4200]
     WEB -->|REST + JWT| GW[gateway-service :9999]
     GW --> AUTH[auth-service :8059]
     GW --> CS[customer-service :8085]
@@ -75,165 +46,167 @@ flowchart LR
     BOT -->|LLM| AI[Google Gemini]
     TG([Telegram]) <-->|long polling| BOT
     DC([Discord]) <-->|WebSocket| BOT
-    AUTH & CS & ES & BOT & GW -.register.-> EU[discovery-service :8761]
+    AUTH & CS & ES & BOT & GW -.enregistrement.-> EU[discovery-service :8761]
 ```
 
-| Service | Port | Role | Data |
+| Service | Port | Rôle | Données |
 |---|---|---|---|
-| `discovery-service` | 8761 | Eureka registry | none |
-| `gateway-service` | 9999 | Single entry point: dynamic routing, CORS, JWT check | none |
-| `auth-service` | 8059 | Sign up, sign in, JWT | H2 file, kept between restarts |
-| `customer-service` | 8085 | Customers through REST and MCP | H2 in memory, 3 customers seeded |
-| `ebank-service` | 8057 | Bank accounts through REST and MCP | H2 in memory, 15 accounts seeded |
-| `ebank-bot` | 8058 | AI agent for web, Telegram and Discord | conversation memory |
-| `angular-front` | 4200 | Web application | none |
+| `discovery-service` | 8761 | Annuaire Eureka | aucune |
+| `gateway-service` | 9999 | Point d'entrée unique : routage dynamique, CORS, vérification du JWT | aucune |
+| `auth-service` | 8059 | Inscription, connexion, JWT | fichier H2, conservé après un redémarrage |
+| `customer-service` | 8085 | Gestion des clients via REST et MCP | H2 en mémoire, 3 clients insérés au démarrage |
+| `ebank-service` | 8057 | Gestion des comptes bancaires via REST et MCP | H2 en mémoire, 15 comptes insérés au démarrage |
+| `ebank-bot` | 8058 | Agent IA pour le web, Telegram et Discord | mémoire des conversations |
+| `angular-front` | 4200 | Application web | aucune |
 
-### How a question is answered
+### Traitement d'une question
 
 ```mermaid
 sequenceDiagram
-    actor U as User
+    actor U as Utilisateur
     participant B as ebank-bot
     participant G as Gemini
     participant C as customer-service
     participant E as ebank-service
     U->>B: Donne-moi les comptes bancaires de Imane
-    B->>G: question + memory + MCP tool descriptions
-    G-->>B: call getAllCustomers
+    B->>G: question + mémoire + description des tools MCP
+    G-->>B: appeler getAllCustomers
     B->>C: MCP tools/call
-    C-->>B: Imane has id 2
-    B->>G: tool result
-    G-->>B: call getAccountsByCustomer(2)
+    C-->>B: Imane a l'id 2
+    B->>G: résultat du tool
+    G-->>B: appeler getAccountsByCustomer(2)
     B->>E: MCP tools/call
-    E-->>B: the accounts of customer 2
-    B->>G: tool result
-    G-->>B: answer in Markdown
-    B-->>U: the accounts of Imane
+    E-->>B: les comptes du client 2
+    B->>G: résultat du tool
+    G-->>B: réponse en Markdown
+    B-->>U: les comptes d'Imane
 ```
 
-### Technologies
+### Technologies utilisées
 
-| Layer | Technologies |
+| Couche | Technologies |
 |---|---|
-| Language | Java 21, TypeScript |
-| Back end | Spring Boot 4.1.1, Spring Data JPA, H2, Lombok, springdoc |
-| Microservices | Spring Cloud 2025.1.3: Gateway, Eureka, OpenFeign, Resilience4j |
-| AI | Spring AI 2.0.1, Google Gemini, MCP (streamable HTTP) |
-| Security | Spring Security, OAuth2 resource server, JWT, BCrypt |
+| Langages | Java 21, TypeScript |
+| Backend | Spring Boot 4.1.1, Spring Data JPA, H2, Lombok, springdoc |
+| Microservices | Spring Cloud 2025.1.3 : Gateway, Eureka, OpenFeign, Resilience4j |
+| Intelligence artificielle | Spring AI 2.0.1, Google Gemini, MCP (streamable HTTP) |
+| Sécurité | Spring Security, OAuth2 Resource Server, JWT, BCrypt |
 | Bots | TelegramBots 10.3, JDA 6.4 (Discord) |
-| Front end | Angular 21 (signals, signal forms), Bootstrap 5, ngx-markdown |
+| Frontend | Angular 21 (signals, signal forms), Bootstrap 5, ngx-markdown |
 
 ---
 
-## 3. Project structure
+## 2. Structure du projet
 
 ```text
 ebank-ms-app/
-├── discovery-service/      Eureka server
-├── gateway-service/        gateway and security rules
-├── auth-service/           users, BCrypt, JWT
+├── discovery-service/      serveur Eureka
+├── gateway-service/        gateway et règles de sécurité
+├── auth-service/           utilisateurs, BCrypt, JWT
 ├── customer-service/
 │   └── .../customerservice
 │       ├── entities/       Customer
 │       ├── repository/     Spring Data
-│       ├── service/        business layer
-│       ├── controllers/    REST API
-│       └── mcp/            MCP tools
+│       ├── service/        couche métier
+│       ├── controllers/    API REST
+│       └── mcp/            tools MCP
 ├── ebank-service/
 │   └── .../ebankservice
 │       ├── entities/       BankAccount, AccountType
-│       ├── model/          Customer (not stored here)
-│       ├── feign/          OpenFeign client and fallback
-│       ├── dtos/           validated request
+│       ├── model/          Customer (non enregistré dans ce service)
+│       ├── feign/          client OpenFeign et méthode de secours
+│       ├── dtos/           requête validée
 │       ├── repository/ service/ controllers/
-│       └── mcp/            MCP tools
+│       └── mcp/            tools MCP
 ├── ebank-bot/
 │   └── .../ebankbot
-│       ├── agents/         the agent
-│       ├── controllers/    /chat and /chatStream
-│       ├── telegram/       Telegram connector
-│       └── discord/        Discord connector
-├── angular-front/          web application
-├── tests/                  end-to-end and security tests
-├── scripts/                start-all and stop-all
-├── docs/                   screenshots, Postman collection, bot guide
-└── .env.example            configuration template
+│       ├── agents/         agent IA
+│       ├── controllers/    /chat et /chatStream
+│       ├── telegram/       connecteur Telegram
+│       └── discord/        connecteur Discord
+├── angular-front/          application web
+├── tests/                  tests de bout en bout et de sécurité
+├── scripts/                start-all et stop-all
+├── docs/                   captures, collection Postman, guide des bots
+└── .env.example            modèle de configuration
 ```
 
 ---
 
-## 4. Installation and start
+## 3. Installation et démarrage
 
-**Requirements:** Windows, Java 21, Node 22 or newer, and a [Gemini API key](https://aistudio.google.com/apikey).
+**Prérequis :** Windows, Java 21, Node 22 ou plus récent et une [clé API Gemini](https://aistudio.google.com/apikey).
 
-**1. Create the configuration**
+**1. Créer la configuration**
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-| Variable | Required | Purpose |
+| Variable | Obligatoire | Utilité |
 |---|---|---|
-| `GEMINI_API_KEY` | yes | Access to Gemini |
-| `JWT_SECRET` | generated | Signs the login tokens, created by the start script |
-| `GEMINI_MODEL` | no | Default: `gemini-3.5-flash-lite` |
-| `TELEGRAM_BOT_TOKEN` | no | Turns the Telegram bot on |
-| `TELEGRAM_ALLOWED_USERS` | with Telegram | Ids allowed to use the bot |
-| `DISCORD_BOT_TOKEN` | no | Turns the Discord bot on |
-| `DISCORD_ALLOWED_USERS` | with Discord | Ids allowed to use the bot |
+| `GEMINI_API_KEY` | oui | Accès à Gemini |
+| `JWT_SECRET` | générée | Signe les tokens de connexion, créée par le script de démarrage |
+| `GEMINI_MODEL` | non | Valeur par défaut : `gemini-3.5-flash-lite` |
+| `TELEGRAM_BOT_TOKEN` | non | Active le bot Telegram |
+| `TELEGRAM_ALLOWED_USERS` | avec Telegram | Identifiants autorisés à utiliser le bot |
+| `DISCORD_BOT_TOKEN` | non | Active le bot Discord |
+| `DISCORD_ALLOWED_USERS` | avec Discord | Identifiants autorisés à utiliser le bot |
 
-`.env` is ignored by git. Never commit it.
+Le fichier `.env` est ignoré par Git. Il ne doit jamais être commité.
 
-**2. Start everything**
+**2. Démarrer l'application**
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\start-all.ps1 -Build
 ```
 
-`-Build` is only needed the first time and after a change in the Java code.
+L'option `-Build` n'est nécessaire que la première fois et après une modification du code Java.
 
-**3. Open <http://localhost:4200>** and choose **Create an account**. There is no default user or password.
+**3. Ouvrir <http://localhost:4200>** et cliquer sur **Create an account** pour créer un compte.
+Il n'existe aucun utilisateur ni mot de passe par défaut.
 
-**4. Stop everything**
+**4. Arrêter l'application**
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\stop-all.ps1
 ```
 
-From an IDE, start in this order: discovery, customer, ebank, auth, gateway, bot, then `npm start` in `angular-front`.
-The bot comes after the two business services because it reads their MCP tools when it starts.
+Depuis un IDE, respecter cet ordre : discovery, customer, ebank, auth, gateway, bot, puis `npm start` dans `angular-front`.
+Le bot démarre après les deux services métier, car il récupère leurs tools MCP au démarrage.
 
 ---
 
-## 5. Part 1: microservices
+## 4. Microservices (partie 1)
 
-### 5.1 customer-service
+### 4.1 customer-service
 
-| Method | Path | Result |
+| Méthode | Chemin | Résultat |
 |---|---|---|
-| GET | `/customers` | All customers |
-| GET | `/customers/{id}` | One customer, 404 if unknown |
-| POST | `/customers` | Create: `{"name":"Hajar","email":"hajar@example.com"}` |
+| GET | `/customers` | Tous les clients |
+| GET | `/customers/{id}` | Un client, 404 s'il n'existe pas |
+| POST | `/customers` | Création : `{"name":"Hajar","email":"hajar@example.com"}` |
 
-![Swagger test of customer-service](docs/screens/34-swagger-test-customers.jpg)
+![Test Swagger de customer-service](docs/screens/34-swagger-test-customers.jpg)
 
-### 5.2 ebank-service
+### 4.2 ebank-service
 
-| Method | Path | Result |
+| Méthode | Chemin | Résultat |
 |---|---|---|
-| GET | `/accounts` | All accounts |
-| GET | `/accounts?customerId=2` | The accounts of one customer |
-| GET | `/accounts/{id}` | One account with its owner |
-| POST | `/accounts` | Create: `{"balance":4000,"type":"SAVING_ACCOUNT","customerId":2}` |
+| GET | `/accounts` | Tous les comptes |
+| GET | `/accounts?customerId=2` | Les comptes d'un client |
+| GET | `/accounts/{id}` | Un compte avec son propriétaire |
+| POST | `/accounts` | Création : `{"balance":4000,"type":"SAVING_ACCOUNT","customerId":2}` |
 
-Types: `CURRENT_ACCOUNT`, `SAVING_ACCOUNT`. The id and the date are set by the service.
+Types de comptes : `CURRENT_ACCOUNT` (compte courant) et `SAVING_ACCOUNT` (compte épargne).
+L'identifiant et la date de création sont générés par le service.
 
-![Swagger of ebank-service](docs/screens/30-swagger-ebank.jpg)
+![Interface Swagger d'ebank-service](docs/screens/30-swagger-ebank.jpg)
 
-### 5.3 OpenFeign
+### 4.3 Communication avec OpenFeign
 
-An account only stores `customerId`. When one account is read, ebank-service asks customer-service for the owner,
-by name, through Eureka:
+Un compte n'enregistre que `customerId`. Lors de la consultation d'un compte, ebank-service demande le propriétaire
+à customer-service, par son nom, grâce à Eureka :
 
 ```java
 @FeignClient(name = "CUSTOMER-SERVICE")
@@ -245,33 +218,33 @@ public interface CustomerRestClient {
 }
 ```
 
-The response below contains the `customer` object returned through Feign. An account cannot be created for a
-customer that does not exist (422).
+La réponse ci-dessous contient l'objet `customer` récupéré avec Feign. Il est impossible de créer un compte pour
+un client qui n'existe pas (erreur 422).
 
-![OpenFeign test](docs/screens/35-swagger-test-openfeign.jpg)
+![Test d'OpenFeign](docs/screens/35-swagger-test-openfeign.jpg)
 
-### 5.4 Circuit breaker with Resilience4j
+### 4.4 Tolérance aux pannes avec Resilience4j
 
-Test: stop customer-service, then read an account several times.
+Test réalisé : arrêter customer-service, puis consulter plusieurs fois un compte.
 
-**The account is still returned, with a fallback customer:**
+**Le compte est toujours retourné, avec un client par défaut :**
 
-![Fallback](docs/screens/40-circuit-breaker-fallback.jpg)
+![Réponse de secours](docs/screens/40-circuit-breaker-fallback.jpg)
 
-**After the failures the circuit is OPEN and the calls are no longer sent:**
+**Après les échecs, le circuit passe à l'état OPEN et les appels ne sont plus envoyés :**
 
-![Circuit open](docs/screens/41-circuit-breaker-open.jpg)
+![Circuit ouvert](docs/screens/41-circuit-breaker-open.jpg)
 
-**The web application tells the user:**
+**L'application web informe l'utilisateur :**
 
-![Degraded mode in the application](docs/screens/32-circuit-breaker.jpg)
+![Mode dégradé dans l'application](docs/screens/32-circuit-breaker.jpg)
 
-Creating an account during the outage is refused (503), because a fallback does not prove that the customer exists.
-When customer-service is back, the circuit closes by itself.
+Pendant la panne, la création d'un compte est refusée (erreur 503), car la réponse de secours ne prouve pas que
+le client existe. Quand customer-service redevient disponible, le circuit se referme automatiquement.
 
-### 5.5 Gateway
+### 4.5 Gateway
 
-The routes are created from the Eureka registry:
+Les routes sont créées dynamiquement à partir de l'annuaire Eureka :
 
 ```java
 @Bean
@@ -280,43 +253,44 @@ DiscoveryClientRouteDefinitionLocator dynamicRoutes(ReactiveDiscoveryClient rdc,
 }
 ```
 
-| Through the gateway | Service |
+| Adresse via la gateway | Service |
 |---|---|
 | `http://localhost:9999/AUTH-SERVICE/auth/login` | auth-service |
 | `http://localhost:9999/CUSTOMER-SERVICE/customers` | customer-service |
 | `http://localhost:9999/EBANK-SERVICE/accounts` | ebank-service |
 | `http://localhost:9999/EBANK-BOT/chatStream?query=...` | ebank-bot |
 
-Business routes need the header `Authorization: Bearer <token>`. A browser that opens them directly receives 401.
+Les routes métier exigent l'en-tête `Authorization: Bearer <token>`. Un navigateur qui les ouvre directement reçoit
+une erreur 401.
 
-### 5.6 Discovery service
+### 4.6 Discovery service
 
-All the services register at <http://localhost:8761>.
+Tous les services s'enregistrent auprès d'Eureka : <http://localhost:8761>.
 
-![Eureka](docs/screens/28-eureka.jpg)
+![Tableau de bord Eureka](docs/screens/28-eureka.jpg)
 
-### 5.7 Tests with Swagger UI and Postman
+### 4.7 Tests avec Swagger UI et Postman
 
-| Swagger UI | Address |
+| Swagger UI | Adresse |
 |---|---|
 | customer-service | <http://localhost:8085/swagger-ui/index.html> |
 | ebank-service | <http://localhost:8057/swagger-ui/index.html> |
 | ebank-bot | <http://localhost:8058/swagger-ui/index.html> |
 | auth-service | <http://localhost:8059/swagger-ui/index.html> |
 
-![Swagger of customer-service](docs/screens/29-swagger-customer.jpg)
+![Interface Swagger de customer-service](docs/screens/29-swagger-customer.jpg)
 
-**Postman:** import [docs/ebank.postman_collection.json](docs/ebank.postman_collection.json) and run it from the top.
-The first request signs up and saves the token for the others. Result of the collection, run with Newman, the
-command line runner of Postman (15 assertions, 0 failed):
+**Postman :** importer [docs/ebank.postman_collection.json](docs/ebank.postman_collection.json) et exécuter la collection
+depuis le début. La première requête crée un utilisateur et enregistre le token pour les suivantes. Résultat de la
+collection, exécutée avec Newman, l'outil en ligne de commande de Postman (15 assertions, 0 échec) :
 
-![Postman results](docs/screens/37-postman-report.jpg)
+![Résultats Postman](docs/screens/37-postman-report.jpg)
 
 ---
 
-## 6. Part 2: AI agent, MCP and bots
+## 5. Agent IA, MCP et bots (partie 2)
 
-### 6.1 The agent
+### 5.1 Agent IA
 
 ```java
 this.chatClient = builder
@@ -326,23 +300,23 @@ this.chatClient = builder
         .build();
 ```
 
-- **System prompt** ([system.md](ebank-bot/src/main/resources/prompts/system.md)): it only answers about the bank,
-  otherwise it says *Je ne sais pas*.
-- **Memory:** LLMs are stateless, so the agent keeps one memory per user and conversation.
-- **Tools:** discovered at startup on the two MCP servers.
-- **Streaming:** `/chat` returns the whole answer, `/chatStream` sends it while it is generated.
+- **Prompt système** ([system.md](ebank-bot/src/main/resources/prompts/system.md)) : l'agent répond uniquement aux
+  questions sur la banque, sinon il répond *Je ne sais pas*.
+- **Mémoire :** les LLM sont sans état (stateless), l'agent garde donc une mémoire par utilisateur et par conversation.
+- **Tools :** ils sont découverts au démarrage sur les deux serveurs MCP.
+- **Streaming :** `/chat` retourne la réponse complète, `/chatStream` l'envoie au fur et à mesure de sa génération.
 
-### 6.2 MCP servers
+### 5.2 Serveurs MCP
 
-| Server | Tool | Purpose |
+| Serveur | Tool | Utilité |
 |---|---|---|
-| `http://localhost:8085/mcp` | `getAllCustomers` | List the customers |
-| | `findCustomerById` | Find one customer |
-| | `saveCustomer` | Create a customer |
-| `http://localhost:8057/mcp` | `getAllBankAccounts` | List the accounts |
-| | `getAccountsByCustomer` | The accounts of one customer |
-| | `getBankAccountById` | One account with its owner |
-| | `saveBankAccount` | Create an account |
+| `http://localhost:8085/mcp` | `getAllCustomers` | Lister les clients |
+| | `findCustomerById` | Chercher un client |
+| | `saveCustomer` | Créer un client |
+| `http://localhost:8057/mcp` | `getAllBankAccounts` | Lister les comptes |
+| | `getAccountsByCustomer` | Lister les comptes d'un client |
+| | `getBankAccountById` | Consulter un compte avec son propriétaire |
+| | `saveBankAccount` | Créer un compte |
 
 ```java
 @McpTool(name = "findCustomerById", description = "Find one customer by id")
@@ -351,183 +325,187 @@ public Customer findCustomerById(@McpToolParam(description = "The numeric custom
 }
 ```
 
-### 6.3 Test with an MCP client
+### 5.3 Test avec un client MCP
 
 ```powershell
 npx @modelcontextprotocol/inspector@0.20.0
 ```
 
-Choose **Streamable HTTP**, enter the URL of a server, then **Connect**, **Tools**, **List Tools** and **Run Tool**.
+Choisir **Streamable HTTP**, saisir l'adresse d'un serveur, puis cliquer sur **Connect**, **Tools**, **List Tools**
+et **Run Tool**.
 
-**customer-service: 3 tools, `getAllCustomers` executed**
+**customer-service : 3 tools, exécution de `getAllCustomers`**
 
-![MCP Inspector on customer-service](docs/screens/38-mcp-inspector-customers.jpg)
+![MCP Inspector sur customer-service](docs/screens/38-mcp-inspector-customers.jpg)
 
-**ebank-service: 4 tools, `getAllBankAccounts` executed**
+**ebank-service : 4 tools, exécution de `getAllBankAccounts`**
 
-![MCP Inspector on ebank-service](docs/screens/39-mcp-inspector-accounts.jpg)
+![MCP Inspector sur ebank-service](docs/screens/39-mcp-inspector-accounts.jpg)
 
-### 6.4 Test the chatbot with a REST client
+### 5.4 Test du chatbot avec un client REST
 
-The question *Liste des clients* is sent to `/chat`. The agent calls customer-service through MCP:
+La question *Liste des clients* est envoyée à `/chat`. L'agent appelle customer-service via MCP :
 
-![Chatbot REST test](docs/screens/36-swagger-test-agent.jpg)
+![Test REST du chatbot](docs/screens/36-swagger-test-agent.jpg)
 
-![Swagger of ebank-bot](docs/screens/31-swagger-bot.jpg)
+![Interface Swagger d'ebank-bot](docs/screens/31-swagger-bot.jpg)
 
-### 6.5 Test the chatbot with Telegram
+### 5.5 Test du chatbot avec Telegram
 
-<img src="docs/screens/33-telegram-bot.png" alt="Telegram test of the E-Bank bot" width="540">
+<img src="docs/screens/33-telegram-bot.png" alt="Test du bot E-Bank avec Telegram" width="540">
 
-| Step | Message | Result | Verified |
+| Étape | Message | Résultat | Vérification |
 |---|---|---|---|
-| 1 | `/start` before being allowed | Refused, the bot shows the user id (hidden in the picture) | closed by default |
-| 2 | `Liste des clients` | 3 customers | same as the customer-service database |
-| 3 | `Donne-moi les comptes bancaires de Imane` | 5 accounts | same ids, balances and dates as ebank-service |
-| 4 | `Ajoute un compte épargne de 4000 MAD pour le client 2` | Account created | found in ebank-service with the same id |
+| 1 | `/start` avant autorisation | Accès refusé, le bot affiche l'identifiant (masqué sur l'image) | bot fermé par défaut |
+| 2 | `Liste des clients` | 3 clients | identiques à la base de customer-service |
+| 3 | `Donne-moi les comptes bancaires de Imane` | 5 comptes | mêmes identifiants, soldes et dates que dans ebank-service |
+| 4 | `Ajoute un compte épargne de 4000 MAD pour le client 2` | Compte créé | retrouvé dans ebank-service avec le même identifiant |
 
-Telegram cannot draw tables, so the connector shows the rows as lines separated by dots.
-Setup: [docs/TELEGRAM_DISCORD.md](docs/TELEGRAM_DISCORD.md).
+Telegram n'affiche pas les tableaux : le connecteur présente donc chaque ligne avec des valeurs séparées par des points.
+Configuration : [guide Telegram et Discord](docs/TELEGRAM_DISCORD.md).
 
-### 6.6 Discord
+### 5.6 Discord
 
-The connector is implemented and covered by unit tests (mentions, other bots ignored, allow list).
-It has **not been tested with a real Discord bot yet**: it starts when `DISCORD_BOT_TOKEN` is set.
-Setup: [docs/TELEGRAM_DISCORD.md](docs/TELEGRAM_DISCORD.md).
+Le connecteur est développé et couvert par des tests unitaires (mentions, messages des autres bots ignorés, liste des
+utilisateurs autorisés). Il **n'a pas encore été testé avec un vrai bot Discord**. Il s'active lorsque
+`DISCORD_BOT_TOKEN` est renseigné.
+Configuration : [guide Telegram et Discord](docs/TELEGRAM_DISCORD.md).
 
 ---
 
-## 7. Part 3: Angular front end
+## 6. Frontend Angular (partie 3)
 
-- Navigation bar with search, tables with filters and sorting, forms with validation (signal forms).
-- HTTP interceptors for the token and the loading indicator, guards on the pages, lazy routes.
-- Streamed answers displayed as Markdown.
-- Light and dark mode, responsive from 320 px.
-- The photos are AI-generated illustrations.
+- Barre de navigation avec recherche, tableaux avec filtres et tri, formulaires avec validation (signal forms).
+- Intercepteurs HTTP pour le token et l'indicateur de chargement, guards sur les pages, routes chargées à la demande.
+- Réponses en streaming affichées en Markdown.
+- Mode clair et mode sombre, interface responsive à partir de 320 px.
+- Les photos sont des illustrations générées par intelligence artificielle.
 
-### Sign in and sign up
+### Connexion et inscription
 
-| | Light | Dark |
+| | Mode clair | Mode sombre |
 |---|---|---|
-| Sign in | ![](docs/screens/01-login-light.jpg) | ![](docs/screens/02-login-dark.jpg) |
-| Sign up | ![](docs/screens/03-signup-light.jpg) | ![](docs/screens/04-signup-dark.jpg) |
+| Connexion | ![](docs/screens/01-login-light.jpg) | ![](docs/screens/02-login-dark.jpg) |
+| Inscription | ![](docs/screens/03-signup-light.jpg) | ![](docs/screens/04-signup-dark.jpg) |
 
-### Home
+### Accueil
 
-| Light | Dark |
+| Mode clair | Mode sombre |
 |---|---|
 | ![](docs/screens/08-home-light-full.jpg) | ![](docs/screens/10-home-dark-full.jpg) |
 | ![](docs/screens/07-home-light.jpg) | ![](docs/screens/09-home-dark.jpg) |
 
-### Accounts
+### Comptes bancaires
 
-| Light | Dark |
+| Mode clair | Mode sombre |
 |---|---|
 | ![](docs/screens/11-accounts-light.jpg) | ![](docs/screens/12-accounts-dark.jpg) |
-| New account ![](docs/screens/14-new-account-light.jpg) | Details with the owner ![](docs/screens/13-account-details-dark.jpg) |
-| No result ![](docs/screens/15-empty-light.jpg) | |
+| Nouveau compte ![](docs/screens/14-new-account-light.jpg) | Détails avec le propriétaire ![](docs/screens/13-account-details-dark.jpg) |
+| Aucun résultat ![](docs/screens/15-empty-light.jpg) | |
 
-### Customers
+### Clients
 
-| Light | Dark |
+| Mode clair | Mode sombre |
 |---|---|
 | ![](docs/screens/16-customers-light.jpg) | ![](docs/screens/17-customers-dark.jpg) |
 
 ### Chatbot
 
-| Light | Dark |
+| Mode clair | Mode sombre |
 |---|---|
 | ![](docs/screens/19-bot-answer-light.jpg) | ![](docs/screens/20-bot-answer-dark.jpg) |
 | ![](docs/screens/18-bot-light.jpg) | |
 
-### Network
+### État des services
 
-| Light | Dark |
+| Mode clair | Mode sombre |
 |---|---|
 | ![](docs/screens/21-network-light.jpg) | ![](docs/screens/22-network-dark.jpg) |
 
-### Mobile
+### Version mobile
 
-| Sign in | Sign up | Home | Menu |
+| Connexion | Inscription | Accueil | Menu |
 |---|---|---|---|
 | ![](docs/screens/05-mobile-login-light.jpg) | ![](docs/screens/06-mobile-signup-dark.jpg) | ![](docs/screens/23-mobile-home-light.jpg) | ![](docs/screens/24-mobile-menu-light.jpg) |
 
-| Accounts | Customers | Chatbot |
+| Comptes | Clients | Chatbot |
 |---|---|---|
 | ![](docs/screens/25-mobile-accounts-dark.jpg) | ![](docs/screens/27-mobile-customers-dark.jpg) | ![](docs/screens/26-mobile-bot-light.jpg) |
 
 ---
 
-## 8. Security
+## 7. Sécurité
 
-| Protection | Detail |
+| Protection | Détails |
 |---|---|
-| Passwords | Hashed with BCrypt, never returned by the API |
-| Brute force | Five failed sign-ins lock the email for five minutes |
-| Tokens | JWT HS256, valid 8 hours, verified by the gateway |
-| Closed gateway | Every route that is not listed is denied: `/mcp`, H2 console, internal actuator |
-| Network | Every service listens on `127.0.0.1` only |
-| H2 console | Off unless `H2_CONSOLE=true` |
-| Agent | A memory per verified user, and cross-site calls to the chat refused |
-| Bots | Closed by default, only the ids listed in `.env` can use them |
-| Secrets | Only in `.env`, which is ignored by git |
+| Mots de passe | Hachés avec BCrypt, jamais retournés par l'API |
+| Attaque par force brute | Cinq échecs de connexion bloquent l'adresse e-mail pendant cinq minutes |
+| Tokens | JWT HS256, valides 8 heures, vérifiés par la gateway |
+| Gateway fermée | Toute route non déclarée est refusée : `/mcp`, console H2, endpoints Actuator internes |
+| Réseau | Tous les services écoutent uniquement sur `127.0.0.1` |
+| Console H2 | Désactivée, sauf si `H2_CONSOLE=true` |
+| Agent | Une mémoire par utilisateur authentifié, appels au chat depuis un autre site refusés |
+| Bots | Fermés par défaut, seuls les identifiants listés dans `.env` sont autorisés |
+| Secrets | Uniquement dans `.env`, qui est ignoré par Git |
 
 ---
 
-## 9. Tests and results
+## 8. Tests et résultats
 
-Results of 22 November 2026:
+Résultats du 22 novembre 2026 :
 
-| Test | Passed | Failed | How to run it |
+| Test | Réussis | Échoués | Exécution |
 |---|---|---|---|
-| Java unit and context tests | 24 | 0 | `.\mvnw.cmd test` in each service |
-| Angular unit tests | 4 | 0 | `npm test` in `angular-front` |
-| API, MCP and agent, end to end | 30 | 0 | `node tests/api.test.mjs` |
-| Security attacks | 45 | 0 | `node tests/security.test.mjs` |
-| Postman collection | 15 | 0 | Postman or Newman |
+| Tests unitaires et de contexte Java | 24 | 0 | `.\mvnw.cmd test` dans chaque service |
+| Tests unitaires Angular | 4 | 0 | `npm test` dans `angular-front` |
+| API, MCP et agent, de bout en bout | 30 | 0 | `node tests/api.test.mjs` |
+| Attaques de sécurité | 45 | 0 | `node tests/security.test.mjs` |
+| Collection Postman | 15 | 0 | Postman ou Newman |
 
-The two Node scripts need the application running. They create test users, a customer and an account, so use a
-disposable user database: in the terminal that starts the application, run this first.
+Les deux scripts Node nécessitent que l'application soit démarrée. Ils créent des utilisateurs, un client et un compte
+de test : il faut donc utiliser une base d'utilisateurs temporaire. Dans le terminal qui démarre l'application,
+exécuter d'abord :
 
 ```powershell
 $env:AUTH_DB_URL = 'jdbc:h2:mem:auth-test;DB_CLOSE_DELAY=-1'
 ```
 
-The end-to-end captures come from a separate copy of the services on other ports (18085, 18057...), so that the
-tests do not change the real data.
+Les captures des tests de bout en bout proviennent d'une copie séparée des services, sur d'autres ports (18085, 18057...),
+afin de ne pas modifier les données réelles.
 
-### Unit tests
+### Tests unitaires
 
-![Unit tests](docs/screens/42-unit-tests.jpg)
+![Tests unitaires](docs/screens/42-unit-tests.jpg)
 
-### API, MCP and agent
+### Tests de l'API, de MCP et de l'agent
 
-![API tests](docs/screens/43-api-tests.jpg)
+![Tests de l'API](docs/screens/43-api-tests.jpg)
 
-### Security
+### Tests de sécurité
 
-![Security tests](docs/screens/44-security-tests.jpg)
+![Tests de sécurité](docs/screens/44-security-tests.jpg)
 
 ---
 
-## 10. Troubleshooting
+## 9. Dépannage
 
-| Problem | Solution |
+| Problème | Solution |
 |---|---|
-| `Ports already in use` | The application is already running, or run `scripts\stop-all.ps1` first |
-| A service does not start | Read `.run\<service>.log` |
-| 503 from the gateway just after the start | Wait 15 seconds for the Eureka registration |
-| `127.0.0.1:4200` does not answer | Use `http://localhost:4200` |
-| 401 on a gateway URL | Sign in and send the Bearer token |
-| The bot says it is unavailable | Gemini is overloaded or over quota: wait, or change `GEMINI_MODEL` |
-| Telegram answers *Accès non autorisé* | Add the id to `TELEGRAM_ALLOWED_USERS` and restart |
-| `409 Conflict` from Telegram | Another program uses the same bot token |
+| `Ports already in use` | L'application tourne déjà, sinon exécuter d'abord `scripts\stop-all.ps1` |
+| Un service ne démarre pas | Consulter `.run\<service>.log` |
+| Erreur 503 de la gateway juste après le démarrage | Attendre 15 secondes, le temps de l'enregistrement dans Eureka |
+| `127.0.0.1:4200` ne répond pas | Utiliser `http://localhost:4200` |
+| Erreur 401 sur une adresse de la gateway | Se connecter et envoyer le token Bearer |
+| Le bot indique qu'il est indisponible | Gemini est surchargé ou le quota est dépassé : patienter ou changer `GEMINI_MODEL` |
+| Telegram répond *Accès non autorisé* | Ajouter l'identifiant à `TELEGRAM_ALLOWED_USERS` et redémarrer |
+| `409 Conflict` avec Telegram | Un autre programme utilise le même token |
 
-## 11. Known limits
+## 10. Limites connues
 
-- Customers and accounts are in memory: a restart restores the demonstration data.
-- The direct ports (8085, 8057, 8058) need no token, so that Swagger and MCP clients work on this machine. Do not publish them.
-- There are no roles: everybody who signs up is a banker and sees every customer.
-- The token is kept in `localStorage`. For production, use an identity provider such as Keycloak.
-- The configuration service and Docker deployment are not part of this version.
-- Discord still has to be tested with a real bot.
+- Les clients et les comptes sont stockés en mémoire : un redémarrage restaure les données de démonstration.
+- Les ports directs (8085, 8057, 8058) ne demandent pas de token, afin de permettre l'utilisation de Swagger et des
+  clients MCP sur cette machine. Ils ne doivent pas être exposés.
+- Il n'y a pas de rôles : toute personne inscrite est considérée comme banquier et voit tous les clients.
+- Le token est conservé dans `localStorage`. En production, utiliser un fournisseur d'identité comme Keycloak.
+- Le service de configuration et le déploiement Docker ne font pas partie de cette version.
+- Discord reste à tester avec un vrai bot.
